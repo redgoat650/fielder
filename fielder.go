@@ -112,6 +112,20 @@ func (roster *Roster) NumPlayers() int {
 	return len(roster.players)
 }
 
+func (roster *Roster) CountGenders() (female, male int) {
+
+	for _, playerInfo := range roster.players {
+		if playerInfo.IsFemale() {
+			female++
+		}
+	}
+
+	male = len(roster.players) - female
+
+	return
+
+}
+
 func NewPlayer(first, last string, gender PlayerGender) *Player {
 	p := new(Player)
 	p.FirstName = first
@@ -274,7 +288,24 @@ const (
 	retryThreshold  = 2500
 )
 
+func checkRoster(roster *Roster) error {
+	female, male := roster.CountGenders()
+	if female < MinGenderCount {
+		return fmt.Errorf("Not enough females. Must forfeit")
+	}
+	if male < MinGenderCount {
+		return fmt.Errorf("Not enough males. Must forfeit.")
+	}
+
+	return nil
+}
+
 func ScheduleGame(innings int, roster *Roster) *Game {
+
+	err := checkRoster(roster)
+	if err != nil {
+		panic(err)
+	}
 
 	var game *Game
 	tries := 0
@@ -388,9 +419,9 @@ func ScheduleGame(innings int, roster *Roster) *Game {
 		}
 	}
 
-	err := game.verify()
-	if err != nil {
-		panic(err)
+	verifErr := game.verify()
+	if verifErr != nil {
+		panic(verifErr)
 	}
 
 	return game
