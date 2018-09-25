@@ -158,7 +158,7 @@ func main() {
 		fmt.Printf("%v\n", v)
 	}
 
-	innings := 1
+	innings := 2
 	game := ScheduleGame(innings, roster)
 
 	fmt.Println(game)
@@ -178,6 +178,19 @@ func NewScoringMatrix(numPlayers int) *ScoringMatrix {
 
 	return mtx
 
+}
+
+func (origMtx *ScoringMatrix) copy() (newMtx *ScoringMatrix) {
+
+	newMtx = NewScoringMatrix(len(origMtx.PlayerIdxByPosition))
+
+	for playerIdx := range origMtx.PlayerIdxByPosition {
+		for fieldPos, score := range origMtx.PlayerIdxByPosition[playerIdx] {
+			newMtx.PlayerIdxByPosition[playerIdx][fieldPos] = score
+		}
+	}
+
+	return
 }
 
 type Inning struct {
@@ -284,7 +297,8 @@ func NewGame(innings int, roster *Roster) *Game {
 
 const (
 	prefScaleFactor = float64(0.3)
-	delta           = float64(0.1)
+	threshDelta     = float64(0.1)
+	benchCredit     = float64(1.0)
 	retryThreshold  = 2500
 )
 
@@ -313,59 +327,87 @@ func ScheduleGame(innings int, roster *Roster) *Game {
 	for {
 
 		for _, playerInfo := range roster.players {
-			playerInfo.Roles = playerInfo.Roles[:0]
+			playerInfo.Roles = make([]Position, innings)
 		}
 
 		game = NewGame(innings, roster)
 
 		for inningNum, inning := range game.Innings {
-			inning.mtx = NewScoringMatrix(roster.NumPlayers())
 
 			initialMax := float64(0)
-			scoringMtx := inning.mtx.PlayerIdxByPosition
-			for playerIdx, playerScores := range scoringMtx {
 
-				for posIdx := range playerScores {
+			if inningNum == 0 {
 
-					//Initialize by seniority and skill
-					playerInfo := roster.players[playerIdx]
-					scoringMtx[playerIdx][posIdx] += playerInfo.Seniority
-					scoringMtx[playerIdx][posIdx] += playerInfo.Skill
+				inning.mtx = NewScoringMatrix(roster.NumPlayers())
 
-					//Initialize by player preference
-					thisPos := posIdx2Position(posIdx)
-					for prefRank, pref := range playerInfo.Pref {
-						if pref == thisPos {
-							scoringMtx[playerIdx][posIdx] += float64(prefRank) * prefScaleFactor
+				scoringMtx := inning.mtx.PlayerIdxByPosition
+				for playerIdx, playerScores := range scoringMtx {
+
+					for posIdx := range playerScores {
+
+						//Initialize by seniority and skill
+						playerInfo := roster.players[playerIdx]
+						scoringMtx[playerIdx][posIdx] += playerInfo.Seniority
+						scoringMtx[playerIdx][posIdx] += playerInfo.Skill
+
+						//Initialize by player preference
+						thisPos := posIdx2Position(posIdx)
+						for prefRank, pref := range playerInfo.Pref {
+							if pref == thisPos {
+								scoringMtx[playerIdx][posIdx] += float64(prefRank) * prefScaleFactor
+							}
+						}
+
+						if scoringMtx[playerIdx][posIdx] > initialMax {
+							initialMax = scoringMtx[playerIdx][posIdx]
+						}
+
+					}
+
+				}
+
+			} else {
+
+				//Start with last inning's matrix
+				inning.mtx = game.Innings[inningNum-1].mtx.copy()
+
+				for playerIdx, playerInfo := range roster.players {
+					if playerInfo.Roles[inningNum-1] == Bench {
+
+						//Player did not play last inning
+						for posIdx := range inning.mtx.PlayerIdxByPosition[playerIdx] {
+							inning.mtx.PlayerIdxByPosition[playerIdx][posIdx] += benchCredit
+
+							//Set the initial max so we can start from an appropriate threshold
+							if inning.mtx.PlayerIdxByPosition[playerIdx][posIdx] > initialMax {
+								initialMax = inning.mtx.PlayerIdxByPosition[playerIdx][posIdx]
+							}
 						}
 					}
-
-					if scoringMtx[playerIdx][posIdx] > initialMax {
-						initialMax = scoringMtx[playerIdx][posIdx]
-					}
-
 				}
 
 			}
 
 			//We're going to establish a threshold and continue lowering it
 			//and assigning players to positions until all positions are filled.
+			assignedPlayers := make(map[*Player]bool)
+
 			for {
 
+				//See if we've filled all the positions and can break out
 				filledPositionCount, _ := inning.CountPlayersOnField()
 				if filledPositionCount == NumFieldPositions || filledPositionCount == roster.NumPlayers() {
 					//Filled all positions needed
 					break
 				}
 
-				assignedPlayers := make(map[*Player]bool)
-
+				//Set up a list of player candidates
 				listOfPlayerIdxsAboveThresholdByPosition := make([][]int, NumFieldPositions)
 				for pos := range listOfPlayerIdxsAboveThresholdByPosition {
 					listOfPlayerIdxsAboveThresholdByPosition[pos] = make([]int, 0)
 				}
 
-				for playerIdx, playerScores := range scoringMtx {
+				for playerIdx, playerScores := range inning.mtx.PlayerIdxByPosition {
 
 					for posIdx, score := range playerScores {
 
@@ -378,29 +420,60 @@ func ScheduleGame(innings int, roster *Roster) *Game {
 							}
 
 							listOfPlayerIdxsAboveThresholdByPosition[posIdx] = append(listOfPlayerIdxsAboveThresholdByPosition[posIdx], playerIdx)
+
+							// fmt.Printf("Player %s is a candidate for position %v because score %f >= threshold %f\n", playerInfo.FirstName, posIdx2Position(posIdx), score, initialMax)
 						}
 
 					}
 				}
 
+				//Each position
 				for posIdx, playerIdxList := range listOfPlayerIdxsAboveThresholdByPosition {
 
-					//Pick a player from the list of players that are above the threshold for this position
-					pickedListIdx := rand.Intn(len(playerIdxList))
-					pickedPlayerIdx := playerIdxList[pickedListIdx]
+					//Check all player indexes for this position
+					for {
 
-					pickedPlayerInfo := roster.players[pickedPlayerIdx]
-					position := posIdx2Position(posIdx)
+						if len(playerIdxList) == 0 {
+							//Couldn't find a suitable candidate at this threshold level
+							break
+						}
 
-					pickedPlayerInfo.Roles = append(pickedPlayerInfo.Roles, position)
-					assignedPlayers[pickedPlayerInfo] = true
-					inning.FieldPositions[position] = pickedPlayerInfo
+						position := posIdx2Position(posIdx)
+						if inning.FieldPositions[position] != nil {
+							//We've already picked a player for this position
+							break
+						}
 
-					fmt.Printf("Picked player %s (%s) to play in position %v for inning %d\n", pickedPlayerInfo.FirstName, pickedPlayerInfo.Gender.String(), position.String(), inningNum)
+						//Pick a player from the list of players that are above the threshold for this position
+						pickedListIdx := rand.Intn(len(playerIdxList))
+						pickedPlayerIdx := playerIdxList[pickedListIdx]
+
+						pickedPlayerInfo := roster.players[pickedPlayerIdx]
+
+						copy(listOfPlayerIdxsAboveThresholdByPosition[posIdx][:pickedListIdx], listOfPlayerIdxsAboveThresholdByPosition[posIdx][:pickedListIdx+1])
+						listOfPlayerIdxsAboveThresholdByPosition[posIdx] = listOfPlayerIdxsAboveThresholdByPosition[posIdx][:len(listOfPlayerIdxsAboveThresholdByPosition[posIdx])-1]
+
+						if len(listOfPlayerIdxsAboveThresholdByPosition[posIdx]) == 0 {
+							//Ran out of candidates: couldn't find a suitable candidate this iteration, try the next position
+							break
+						}
+
+						if assignedPlayers[pickedPlayerInfo] {
+							//Try the next player in the list of candidates
+							continue
+						}
+
+						pickedPlayerInfo.Roles[inningNum] = position
+						assignedPlayers[pickedPlayerInfo] = true
+						inning.FieldPositions[position] = pickedPlayerInfo
+
+						fmt.Printf("Picked player %s (%s) to play in position %v for inning %d\n", pickedPlayerInfo.FirstName, pickedPlayerInfo.Gender.String(), position.String(), inningNum)
+						break
+					}
 
 				}
 
-				initialMax -= delta
+				initialMax -= threshDelta
 
 			}
 
