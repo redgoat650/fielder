@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 )
 
 type Player struct {
@@ -26,8 +27,8 @@ func (player *Player) IsFemale() bool {
 
 type PlayerGender int
 
-func (gender *PlayerGender) String() string {
-	switch *gender {
+func (gender PlayerGender) String() string {
+	switch gender {
 	case FemaleGender:
 		return fmt.Sprintf("Female")
 	case MaleGender:
@@ -61,8 +62,10 @@ const (
 	NumFieldPositions int = iota - 1 //Don't include bench
 )
 
-func (pos *Position) String() string {
-	switch *pos {
+func (pos Position) String() string {
+	switch pos {
+	case Bench:
+		return "Bench"
 	case Pitcher:
 		return "Pitcher"
 	case Catcher:
@@ -139,18 +142,37 @@ func NewPlayer(first, last string, gender PlayerGender) *Player {
 	return p
 }
 
-func main() {
+var testPlayers map[string]PlayerGender = map[string]PlayerGender{
+	"Nick":  MaleGender,
+	"Patty": FemaleGender,
+	"Rob":   MaleGender,
+	"Scott": MaleGender,
+	// "Shawn":     FemaleGender,
+	"Craig": MaleGender,
+	"Cody":  MaleGender,
+	// "Jenna":     FemaleGender,
+	"Sam": MaleGender,
+	// "Kira":      FemaleGender,
+	// "Shelli":    FemaleGender,
+	"Yev": MaleGender,
+	// "Blair":     FemaleGender,
+	"Jen":       FemaleGender,
+	"Patrick":   MaleGender,
+	"Alexandra": FemaleGender,
+	"Son":       MaleGender,
+	"Christina": FemaleGender,
+	"Andrew":    MaleGender,
+	"David":     MaleGender,
+	"Brett":     MaleGender,
+}
 
-	numPlayersIn := 20
+func main() {
 
 	roster := new(Roster)
 	roster.players = make([]*Player, 0)
 
-	for player := 0; player < numPlayersIn; player++ {
-
-		gender := PlayerGender(rand.Intn(NumGenders))
-
-		newPlayer := NewPlayer(fmt.Sprintf("Player%d", player), "blab", gender)
+	for player, gender := range testPlayers {
+		newPlayer := NewPlayer(player, "blab", gender)
 		roster.players = append(roster.players, newPlayer)
 	}
 
@@ -158,7 +180,7 @@ func main() {
 		fmt.Printf("%v\n", v)
 	}
 
-	innings := 2
+	innings := 5
 	game := ScheduleGame(innings, roster)
 
 	fmt.Println(game)
@@ -256,8 +278,97 @@ const (
 	MinGenderCount = 4
 )
 
+func (game Game) String() string {
+
+	//Analysis of players in each position by inning
+	s := new(strings.Builder)
+	for inningNum, inning := range game.Innings {
+
+		s.WriteString(fmt.Sprintf("Inning %d:\n", inningNum))
+
+		for pos, player := range inning.FieldPositions {
+			s.WriteString(fmt.Sprintf("%s: %s (%s)\n", pos, player.FirstName, player.Gender))
+		}
+
+		s.WriteString("----------------\n")
+
+	}
+
+	//Analysis for each player
+	mostInnings := 0
+	leastInnings := len(game.Innings)
+	mostInningsMale := 0
+	mostInningsFemale := 0
+	leastInningsMale := len(game.Innings)
+	leastInningsFemale := len(game.Innings)
+
+	for _, player := range game.Players.players {
+
+		inningsThisPlayer := 0
+
+		for inningNum, role := range player.Roles {
+			s.WriteString(fmt.Sprintf("Inning %d: %s plays ", inningNum, player.FirstName))
+			if role == Bench {
+				s.WriteString(fmt.Sprintf("(%s)\n", role))
+			} else {
+				s.WriteString(fmt.Sprintf("%s\n", role))
+			}
+
+			if role != Bench {
+				inningsThisPlayer++
+			}
+		}
+
+		s.WriteString(fmt.Sprintf("%s is playing %d innings\n", player.FirstName, inningsThisPlayer))
+		s.WriteString(fmt.Sprintf("----------\n"))
+
+		if inningsThisPlayer > mostInnings {
+			mostInnings = inningsThisPlayer
+		}
+		if inningsThisPlayer < leastInnings {
+			leastInnings = inningsThisPlayer
+		}
+		if player.IsFemale() {
+			if inningsThisPlayer > mostInningsFemale {
+				mostInningsFemale = inningsThisPlayer
+			}
+			if inningsThisPlayer < leastInningsFemale {
+				leastInningsFemale = inningsThisPlayer
+			}
+		} else {
+			if inningsThisPlayer > mostInningsMale {
+				mostInningsMale = inningsThisPlayer
+			}
+			if inningsThisPlayer < leastInningsMale {
+				leastInningsMale = inningsThisPlayer
+			}
+
+		}
+
+	}
+
+	s.WriteString(fmt.Sprintf("Most innings played by a player: %d\nLeast innings played by a player: %d\n", mostInnings, leastInnings))
+	s.WriteString(fmt.Sprintf("Most innings played by a FEMALE: %d\nLeast innings played by a FEMALE: %d\n", mostInningsFemale, leastInningsFemale))
+	s.WriteString(fmt.Sprintf("Most innings played by a MALE: %d\nLeast innings played by a MALE: %d\n", mostInningsMale, leastInningsMale))
+
+	s.WriteString("\n")
+
+	//Analysis of each position by inning
+
+	return s.String()
+}
+
 func (game *Game) NumPlayers() int {
 	return game.Players.NumPlayers()
+}
+
+type GenderError struct {
+	err    error
+	gender PlayerGender
+}
+
+func (err GenderError) Error() string {
+	return err.err.Error()
 }
 
 func (game *Game) verify() error {
@@ -273,7 +384,12 @@ func (game *Game) verify() error {
 
 		femaleCount, maleCount := inning.CountGenders()
 		if femaleCount < MinGenderCount || maleCount < MinGenderCount {
-			return fmt.Errorf("Invalid gender assignment in this inning. Inning %d females: %d/%d males %d/%d", inningNum, femaleCount, MinGenderCount, maleCount, MinGenderCount)
+			err := fmt.Errorf("Invalid gender assignment in this inning. Inning %d females: %d/%d males %d/%d", inningNum, femaleCount, MinGenderCount, maleCount, MinGenderCount)
+			gender := MaleGender
+			if femaleCount < MinGenderCount {
+				gender = FemaleGender
+			}
+			return GenderError{err: err, gender: gender}
 		}
 
 	}
@@ -299,6 +415,7 @@ const (
 	prefScaleFactor = float64(0.3)
 	threshDelta     = float64(0.1)
 	benchCredit     = float64(1.0)
+	genderDelta     = float64(0.1)
 	retryThreshold  = 2500
 )
 
@@ -323,6 +440,8 @@ func ScheduleGame(innings int, roster *Roster) *Game {
 
 	var game *Game
 	tries := 0
+	maleGenderOffset := 0.0
+	femaleGenderOffset := 0.0
 
 	for {
 
@@ -358,6 +477,17 @@ func ScheduleGame(innings int, roster *Roster) *Game {
 							}
 						}
 
+						//Scale gender offset
+						if playerInfo.IsFemale() {
+							old := scoringMtx[playerIdx][posIdx]
+							scoringMtx[playerIdx][posIdx] += femaleGenderOffset
+							fmt.Println("Female", old, scoringMtx[playerIdx][posIdx], femaleGenderOffset)
+						} else {
+							old := scoringMtx[playerIdx][posIdx]
+							scoringMtx[playerIdx][posIdx] += maleGenderOffset
+							fmt.Println("Male", old, scoringMtx[playerIdx][posIdx], maleGenderOffset)
+						}
+
 						if scoringMtx[playerIdx][posIdx] > initialMax {
 							initialMax = scoringMtx[playerIdx][posIdx]
 						}
@@ -385,7 +515,6 @@ func ScheduleGame(innings int, roster *Roster) *Game {
 						}
 					}
 				}
-
 			}
 
 			//We're going to establish a threshold and continue lowering it
@@ -467,7 +596,7 @@ func ScheduleGame(innings int, roster *Roster) *Game {
 						assignedPlayers[pickedPlayerInfo] = true
 						inning.FieldPositions[position] = pickedPlayerInfo
 
-						fmt.Printf("Picked player %s (%s) to play in position %v for inning %d\n", pickedPlayerInfo.FirstName, pickedPlayerInfo.Gender.String(), position.String(), inningNum)
+						fmt.Printf("Picked player %s (%s) to play in position %v for inning %d\n", pickedPlayerInfo.FirstName, pickedPlayerInfo.Gender, position, inningNum)
 						break
 					}
 
@@ -482,6 +611,14 @@ func ScheduleGame(innings int, roster *Roster) *Game {
 		verErr := game.verify()
 		if verErr == nil {
 			break
+		}
+
+		if genderErr, ok := verErr.(GenderError); ok {
+			if genderErr.gender == FemaleGender {
+				femaleGenderOffset += genderDelta
+			} else {
+				maleGenderOffset += genderDelta
+			}
 		}
 
 		fmt.Println("Iterating because verify failed: ", verErr.Error())
