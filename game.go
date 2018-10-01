@@ -181,9 +181,9 @@ func (game *Game) ScheduleGame() error {
 						thisPos := posIdx2Position(posIdx)
 						for prefRank, pref := range playerInfo.Pref {
 							if pref == thisPos {
-								old := scoringMtx[playerIdx][posIdx]
+								// old := scoringMtx[playerIdx][posIdx]
 								scoringMtx[playerIdx][posIdx] += (maxPreferences - float64(prefRank)) * prefScaleFactor
-								fmt.Println(playerInfo.FirstName, "OLD", old, "NEW", scoringMtx[playerIdx][posIdx])
+								// fmt.Println(playerInfo.FirstName, "OLD", old, "NEW", scoringMtx[playerIdx][posIdx])
 							}
 						}
 
