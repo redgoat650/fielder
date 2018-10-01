@@ -4,15 +4,21 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"time"
 )
 
 type Game struct {
 	Innings []*Inning
 	Roster  *Roster
+
+	Time time.Time
+
+	self *Game
 }
 
-func NewGame(innings int, roster *Roster) *Game {
+func NewGame(innings int) *Game {
 	game := new(Game)
+	game.self = game
 
 	game.Innings = make([]*Inning, 0)
 
@@ -20,9 +26,11 @@ func NewGame(innings int, roster *Roster) *Game {
 		game.Innings = append(game.Innings, NewInning())
 	}
 
-	game.Roster = roster
-
 	return game
+}
+
+func (game *Game) SetRoster(roster *Roster) {
+	game.Roster = roster
 }
 
 func (game Game) String() string {
@@ -53,7 +61,7 @@ func (game Game) String() string {
 
 		inningsThisPlayer := 0
 
-		for inningNum, role := range player.Roles {
+		for inningNum, role := range player.Roles[game.self] {
 			s.WriteString(fmt.Sprintf("Inning %d: %s plays ", inningNum, player.FirstName))
 			if role == Bench {
 				s.WriteString(fmt.Sprintf("(%s)\n", role))
@@ -69,6 +77,7 @@ func (game Game) String() string {
 		s.WriteString(fmt.Sprintf("%s is playing %d innings\n", player.FirstName, inningsThisPlayer))
 		s.WriteString(fmt.Sprintf("----------\n"))
 
+		//Counter metrics
 		if inningsThisPlayer > mostInnings {
 			mostInnings = inningsThisPlayer
 		}
@@ -135,7 +144,7 @@ func (game *Game) ScheduleGame() error {
 	for {
 
 		for _, playerInfo := range game.Roster.players {
-			playerInfo.Roles = make([]Position, game.NumInnings())
+			playerInfo.Roles[game] = make([]Position, game.NumInnings())
 		}
 
 		for inningNum, inning := range game.Innings {
@@ -191,7 +200,7 @@ func (game *Game) ScheduleGame() error {
 				inning.mtx = game.Innings[inningNum-1].mtx.copy()
 
 				for playerIdx, playerInfo := range game.Roster.players {
-					if playerInfo.Roles[inningNum-1] == Bench {
+					if playerInfo.Roles[game][inningNum-1] == Bench {
 
 						//Player did not play last inning
 						for posIdx := range inning.mtx.PlayerIdxByPosition[playerIdx] {
@@ -281,7 +290,7 @@ func (game *Game) ScheduleGame() error {
 							continue
 						}
 
-						pickedPlayerInfo.Roles[inningNum] = position
+						pickedPlayerInfo.Roles[game][inningNum] = position
 						assignedPlayers[pickedPlayerInfo] = true
 						inning.FieldPositions[position] = pickedPlayerInfo
 

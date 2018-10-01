@@ -13,7 +13,7 @@ type Player struct {
 	Seniority float64
 	Skill     float64
 
-	Roles         []Position
+	Roles         map[*Game][]Position
 	scoreByInning []float64
 
 	Attendance map[*Game]bool
@@ -26,7 +26,8 @@ func NewPlayer(first, last string, gender PlayerGender) *Player {
 	p.Gender = gender
 
 	p.Pref = make([]Position, 0)
-	p.Roles = make([]Position, 0)
+	// p.Roles = make([]Position, 0)
+	p.Roles = make(map[*Game][]Position)
 	p.scoreByInning = make([]float64, 0)
 
 	return p
@@ -34,6 +35,10 @@ func NewPlayer(first, last string, gender PlayerGender) *Player {
 
 func (player *Player) IsFemale() bool {
 	return player.Gender == FemaleGender
+}
+
+func (player *Player) IsAttending(game *Game) bool {
+	return player.Attendance[game]
 }
 
 type PlayerGender int

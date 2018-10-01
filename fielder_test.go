@@ -31,8 +31,7 @@ func TestScheduleGame(t *testing.T) {
 		"Brett":     MaleGender,
 	}
 
-	roster := new(Roster)
-	roster.players = make([]*Player, 0)
+	roster := NewRoster()
 
 	for player, gender := range testPlayers {
 		newPlayer := NewPlayer(player, "blab", gender)
@@ -44,7 +43,8 @@ func TestScheduleGame(t *testing.T) {
 	}
 
 	innings := 5
-	game := NewGame(innings, roster)
+	game := NewGame(innings)
+	game.SetRoster(roster)
 	schedErr := game.ScheduleGame()
 	if schedErr != nil {
 		panic(schedErr)
