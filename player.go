@@ -29,6 +29,7 @@ func NewPlayer(first, last string, gender PlayerGender) *Player {
 	// p.Roles = make([]Position, 0)
 	p.Roles = make(map[*Game][]Position)
 	p.scoreByInning = make([]float64, 0)
+	p.Attendance = make(map[*Game]bool)
 
 	return p
 }

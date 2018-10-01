@@ -123,7 +123,8 @@ func (game *Game) NumInnings() int {
 }
 
 const (
-	prefScaleFactor = float64(0.3)
+	maxPreferences  = 3
+	prefScaleFactor = float64(0.2)
 	threshDelta     = float64(0.1)
 	benchCredit     = float64(1.0)
 	genderDelta     = float64(0.1)
@@ -171,19 +172,21 @@ func (game *Game) ScheduleGame() error {
 						thisPos := posIdx2Position(posIdx)
 						for prefRank, pref := range playerInfo.Pref {
 							if pref == thisPos {
-								scoringMtx[playerIdx][posIdx] += float64(prefRank) * prefScaleFactor
+								old := scoringMtx[playerIdx][posIdx]
+								scoringMtx[playerIdx][posIdx] += (maxPreferences - float64(prefRank)) * prefScaleFactor
+								fmt.Println(playerInfo.FirstName, "OLD", old, "NEW", scoringMtx[playerIdx][posIdx])
 							}
 						}
 
 						//Scale gender offset
 						if playerInfo.IsFemale() {
-							old := scoringMtx[playerIdx][posIdx]
+							// old := scoringMtx[playerIdx][posIdx]
 							scoringMtx[playerIdx][posIdx] += femaleGenderOffset
-							fmt.Println("Female", old, scoringMtx[playerIdx][posIdx], femaleGenderOffset)
+							// fmt.Println("Female", old, scoringMtx[playerIdx][posIdx], femaleGenderOffset)
 						} else {
-							old := scoringMtx[playerIdx][posIdx]
+							// old := scoringMtx[playerIdx][posIdx]
 							scoringMtx[playerIdx][posIdx] += maleGenderOffset
-							fmt.Println("Male", old, scoringMtx[playerIdx][posIdx], maleGenderOffset)
+							// fmt.Println("Male", old, scoringMtx[playerIdx][posIdx], maleGenderOffset)
 						}
 
 						if scoringMtx[playerIdx][posIdx] > initialMax {
@@ -260,14 +263,22 @@ func (game *Game) ScheduleGame() error {
 					//Check all player indexes for this position
 					for {
 
+						position := posIdx2Position(posIdx)
 						if len(playerIdxList) == 0 {
+							// fmt.Println("Couldn't find a suitable candidate for", position)
 							//Couldn't find a suitable candidate at this threshold level
 							break
 						}
 
-						position := posIdx2Position(posIdx)
 						if inning.FieldPositions[position] != nil {
 							//We've already picked a player for this position
+							// fmt.Println("Already picked a player for position", position)
+							break
+						}
+
+						if len(listOfPlayerIdxsAboveThresholdByPosition[posIdx]) == 0 {
+							//Ran out of candidates: couldn't find a suitable candidate this iteration, try the next position
+							// fmt.Println("Ran out of candidates for position", position)
 							break
 						}
 
@@ -277,16 +288,14 @@ func (game *Game) ScheduleGame() error {
 
 						pickedPlayerInfo := game.Roster.players[pickedPlayerIdx]
 
+						// fmt.Println("Picked", pickedPlayerInfo.FirstName)
+
 						copy(listOfPlayerIdxsAboveThresholdByPosition[posIdx][:pickedListIdx], listOfPlayerIdxsAboveThresholdByPosition[posIdx][:pickedListIdx+1])
 						listOfPlayerIdxsAboveThresholdByPosition[posIdx] = listOfPlayerIdxsAboveThresholdByPosition[posIdx][:len(listOfPlayerIdxsAboveThresholdByPosition[posIdx])-1]
 
-						if len(listOfPlayerIdxsAboveThresholdByPosition[posIdx]) == 0 {
-							//Ran out of candidates: couldn't find a suitable candidate this iteration, try the next position
-							break
-						}
-
 						if assignedPlayers[pickedPlayerInfo] {
 							//Try the next player in the list of candidates
+							// fmt.Println("Player already assigned for position", position, "...try next")
 							continue
 						}
 
@@ -294,7 +303,7 @@ func (game *Game) ScheduleGame() error {
 						assignedPlayers[pickedPlayerInfo] = true
 						inning.FieldPositions[position] = pickedPlayerInfo
 
-						fmt.Printf("Picked player %s (%s) to play in position %v for inning %d\n", pickedPlayerInfo.FirstName, pickedPlayerInfo.Gender, position, inningNum)
+						// fmt.Printf("Picked player %s (%s) to play in position %v for inning %d\n", pickedPlayerInfo.FirstName, pickedPlayerInfo.Gender, position, inningNum)
 						break
 					}
 

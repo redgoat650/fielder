@@ -1,5 +1,10 @@
 package fielder
 
+import (
+	"fmt"
+	"strings"
+)
+
 type Season struct {
 	Team  *Team
 	Games []*Game
@@ -45,4 +50,18 @@ func (season *Season) ScheduleAllGames() error {
 
 	}
 	return nil
+}
+
+func (season Season) String() string {
+	str := new(strings.Builder)
+	for gameNum, game := range season.Games {
+
+		str.WriteString(fmt.Sprintf("Game %d:\n", gameNum))
+
+		str.WriteString(game.String())
+
+		str.WriteString("---------------------------------\n")
+
+	}
+	return str.String()
 }
