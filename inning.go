@@ -1,11 +1,14 @@
 package fielder
 
+//Inning is a struct for tracking the players assigned to each
+//field position for this game inning.
 type Inning struct {
 	FieldPositions map[Position]*Player
 
 	mtx *ScoringMatrix
 }
 
+//NewInning will initialize an Inning and return its pointer
 func NewInning() *Inning {
 	inning := new(Inning)
 	inning.FieldPositions = make(map[Position]*Player)
@@ -13,6 +16,8 @@ func NewInning() *Inning {
 	return inning
 }
 
+//InitializeFieldPositions will initialize the map of valid field positions
+//to nil values.
 func (inning *Inning) InitializeFieldPositions() {
 	inning.FieldPositions[Pitcher] = nil
 	inning.FieldPositions[Catcher] = nil
@@ -27,6 +32,8 @@ func (inning *Inning) InitializeFieldPositions() {
 	inning.FieldPositions[RField] = nil
 }
 
+//CountPlayersOnField is an Inning method that will return the number
+//of positions that are filled, and the number of positions that are unfilled.
 func (inning *Inning) CountPlayersOnField() (filled, unfilled int) {
 	filledCount := 0
 	unfilledCount := 0
@@ -45,6 +52,8 @@ func (inning *Inning) CountPlayersOnField() (filled, unfilled int) {
 	return filledCount, unfilledCount
 }
 
+//CountGenders is an Inning method that returns the number of
+//male and female players assigned to positions in this inning.
 func (inning *Inning) CountGenders() (female, male int) {
 	for _, position := range inning.FieldPositions {
 		if position != nil {

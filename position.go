@@ -2,8 +2,10 @@ package fielder
 
 import "fmt"
 
+//Position is a type that describes a field position
 type Position int
 
+//List of valid field positions and the bench positions
 const (
 	Bench Position = iota
 	Pitcher
@@ -20,6 +22,8 @@ const (
 	NumFieldPositions int = iota - 1 //Don't include bench
 )
 
+//String is a position method that satisfies the Stringer interface and
+//returns a string describing the Position receiver.
 func (pos Position) String() string {
 	switch pos {
 	case Bench:
@@ -52,6 +56,9 @@ func (pos Position) String() string {
 
 }
 
+//posIdx2Position converts a position index to a Position value,
+//assuming the position index is originating from a zero-indexed
+//list of valid field positions
 func posIdx2Position(posIdx int) Position {
 
 	if posIdx > NumFieldPositions {
@@ -61,6 +68,8 @@ func posIdx2Position(posIdx int) Position {
 	//Skip the bench position, return the next position
 	return Position(posIdx + 1)
 }
+
+//position2PosIdx returns the position index from an input Position
 func position2PosIdx(pos Position) int {
 	return int(pos) - 1
 }

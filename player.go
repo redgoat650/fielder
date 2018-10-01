@@ -2,6 +2,8 @@ package fielder
 
 import "fmt"
 
+//Player is a struct for storing the information and scheduling
+//information for each player
 type Player struct {
 	FirstName string
 	LastName  string
@@ -19,6 +21,7 @@ type Player struct {
 	Attendance map[*Game]bool
 }
 
+//NewPlayer initializes a new Player and returns its pointer
 func NewPlayer(first, last string, gender PlayerGender) *Player {
 	p := new(Player)
 	p.FirstName = first
@@ -34,16 +37,23 @@ func NewPlayer(first, last string, gender PlayerGender) *Player {
 	return p
 }
 
+//IsFemale is a helper method for Player that returns whether
+//the player is female
 func (player *Player) IsFemale() bool {
 	return player.Gender == FemaleGender
 }
 
+//IsAttending is a helper method for Player that returns whether
+//the player in question is planning to attend the provided Game
 func (player *Player) IsAttending(game *Game) bool {
 	return player.Attendance[game]
 }
 
+//PlayerGender is a type that describes the gender of a player
 type PlayerGender int
 
+//String is a helper method on PlayerGender that satisfies the
+//Stringer interface to assist with printing the gender of the player
 func (gender PlayerGender) String() string {
 	switch gender {
 	case FemaleGender:
@@ -55,6 +65,7 @@ func (gender PlayerGender) String() string {
 	}
 }
 
+//List of PlayerGenders
 const (
 	FemaleGender PlayerGender = iota
 	MaleGender

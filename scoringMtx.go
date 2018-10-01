@@ -1,9 +1,12 @@
 package fielder
 
+//ScoringMatrix is a helper struct that contains a 2D matrix
+//of position-propensity score for a given position by a given player.
 type ScoringMatrix struct {
 	PlayerIdxByPosition [][]float64
 }
 
+//NewScoringMatrix initializes a ScoringMatrix and returns its pointer
 func NewScoringMatrix(numPlayers int) *ScoringMatrix {
 	mtx := new(ScoringMatrix)
 
@@ -16,6 +19,8 @@ func NewScoringMatrix(numPlayers int) *ScoringMatrix {
 
 }
 
+//copy is a helper method that will copy the score values of another
+//ScoringMatrix into the ScoringMatrix receiver
 func (origMtx *ScoringMatrix) copy() (newMtx *ScoringMatrix) {
 
 	newMtx = NewScoringMatrix(len(origMtx.PlayerIdxByPosition))

@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+//Game is a struct for holding information on a particular game
 type Game struct {
 	Innings []*Inning
 	Roster  *Roster
@@ -16,6 +17,8 @@ type Game struct {
 	self *Game
 }
 
+//NewGame initializes a new Game with the provided number of innings
+//and returns its pointer
 func NewGame(innings int) *Game {
 	game := new(Game)
 	game.self = game
@@ -29,10 +32,12 @@ func NewGame(innings int) *Game {
 	return game
 }
 
+//SetRoster sets the roster for this game
 func (game *Game) SetRoster(roster *Roster) {
 	game.Roster = roster
 }
 
+//String satisfies the stringer interface for Game
 func (game Game) String() string {
 
 	//Analysis of players in each position by inning
@@ -114,10 +119,12 @@ func (game Game) String() string {
 	return s.String()
 }
 
+//NumPlayers is a Game method that returns the number of players in the roster for this game
 func (game *Game) NumPlayers() int {
 	return game.Roster.NumPlayers()
 }
 
+//NumInnings is a Game method that returns the number of innings for this game
 func (game *Game) NumInnings() int {
 	return len(game.Innings)
 }
@@ -131,6 +138,8 @@ const (
 	retryThreshold  = 2500
 )
 
+//ScheduleGame is a Game method that schedules positions for all players
+//in the Game roster.
 func (game *Game) ScheduleGame() error {
 
 	err := checkRoster(game.Roster)

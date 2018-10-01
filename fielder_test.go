@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var testPlayers map[string]PlayerGender = map[string]PlayerGender{
+var testPlayers = map[string]PlayerGender{
 	"Nick":      MaleGender,
 	"Patty":     FemaleGender,
 	"Rob":       MaleGender,

@@ -5,11 +5,15 @@ import (
 	"strings"
 )
 
+//Season is a struct for describing the Season for a Team.
 type Season struct {
 	Team  *Team
 	Games []*Game
 }
 
+//NewSeason initializes a Season with a new Team for a given
+//number of games, with a given number of innings per game, and
+//returns its pointer
 func NewSeason(numGames int, inningsPerGame int) *Season {
 	season := new(Season)
 
@@ -23,6 +27,8 @@ func NewSeason(numGames int, inningsPerGame int) *Season {
 	return season
 }
 
+//ScheduleAllGames schedules the all games in the season for the provided
+//Season.
 func (season *Season) ScheduleAllGames() error {
 
 	if season.Team == nil {
@@ -52,6 +58,8 @@ func (season *Season) ScheduleAllGames() error {
 	return nil
 }
 
+//String implements the Stringer interface and nicely displays the
+//schedule for the season in a human-readable form
 func (season Season) String() string {
 	str := new(strings.Builder)
 	for gameNum, game := range season.Games {
