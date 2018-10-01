@@ -9,6 +9,11 @@ type Inning struct {
 func NewInning() *Inning {
 	inning := new(Inning)
 	inning.FieldPositions = make(map[Position]*Player)
+	inning.InitializeFieldPositions()
+	return inning
+}
+
+func (inning *Inning) InitializeFieldPositions() {
 	inning.FieldPositions[Pitcher] = nil
 	inning.FieldPositions[Catcher] = nil
 	inning.FieldPositions[First] = nil
@@ -20,7 +25,6 @@ func NewInning() *Inning {
 	inning.FieldPositions[LCenter] = nil
 	inning.FieldPositions[RCenter] = nil
 	inning.FieldPositions[RField] = nil
-	return inning
 }
 
 func (inning *Inning) CountPlayersOnField() (filled, unfilled int) {

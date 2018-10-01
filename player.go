@@ -15,6 +15,8 @@ type Player struct {
 
 	Roles         []Position
 	scoreByInning []float64
+
+	Attendance map[*Game]bool
 }
 
 func NewPlayer(first, last string, gender PlayerGender) *Player {

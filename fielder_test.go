@@ -44,7 +44,11 @@ func TestScheduleGame(t *testing.T) {
 	}
 
 	innings := 5
-	game := ScheduleGame(innings, roster)
+	game := NewGame(innings, roster)
+	schedErr := game.ScheduleGame()
+	if schedErr != nil {
+		panic(schedErr)
+	}
 
 	fmt.Println(game)
 }
