@@ -27,4 +27,5 @@ func (team *Team) SetTeamName(name string) {
 //AddPlayer will append a new Player to the Team's player list
 func (team *Team) AddPlayer(player *Player) {
 	team.Players.AddPlayer(player)
+	team.Active.AddPlayer(player)
 }

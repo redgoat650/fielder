@@ -35,10 +35,10 @@ func TestScheduleGame(t *testing.T) {
 
 	for player, gender := range testPlayers {
 		newPlayer := NewPlayer(player, "blab", gender)
-		roster.Players = append(roster.Players, newPlayer)
+		roster.AddPlayer(newPlayer)
 	}
 
-	for _, v := range roster.Players {
+	for v := range roster.Players {
 		fmt.Printf("%v\n", v)
 	}
 
@@ -98,10 +98,10 @@ func TestPreferences(t *testing.T) {
 		if newPlayer.FirstName == "Sam" {
 			newPlayer.Pref = append(newPlayer.Pref, Pitcher)
 		}
-		roster.Players = append(roster.Players, newPlayer)
+		roster.AddPlayer(newPlayer)
 	}
 
-	for _, v := range roster.Players {
+	for v := range roster.Players {
 		fmt.Printf("%v\n", v)
 	}
 
