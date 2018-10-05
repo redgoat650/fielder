@@ -215,14 +215,14 @@ func (game *Game) ScheduleGame() error {
 						}
 
 						//Scale gender offset
+						//Pick a random offset up to the gender offset.
+						//This counteracts any ping-pong harmonics in the
+						//picking algorithm that will cause it to never converge
+						//as the male and female scores trade places on each iteration.
 						if playerInfo.IsFemale() {
-							// old := scoringMtx[playerIdx][posIdx]
 							scoringMtx[playerIdx][posIdx] += rand.Float64() * femaleGenderOffset
-							// fmt.Println("Female", old, scoringMtx[playerIdx][posIdx], femaleGenderOffset)
 						} else {
-							// old := scoringMtx[playerIdx][posIdx]
 							scoringMtx[playerIdx][posIdx] += rand.Float64() * maleGenderOffset
-							// fmt.Println("Male", old, scoringMtx[playerIdx][posIdx], maleGenderOffset)
 						}
 
 						if scoringMtx[playerIdx][posIdx] > initialMax {

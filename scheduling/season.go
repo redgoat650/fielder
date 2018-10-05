@@ -55,7 +55,7 @@ func (season *Season) ScheduleAllGames() error {
 		gameRoster := NewRoster()
 
 		//Add players to the roster if they're marked as attending
-		for _, player := range season.Team.Players {
+		for _, player := range season.Team.Active.Players {
 			if player.IsAttending(game) {
 				gameRoster.AddPlayer(player)
 			}

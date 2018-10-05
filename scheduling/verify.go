@@ -23,9 +23,9 @@ func (err GenderError) Error() string {
 //to ensure the result is a valid position distribution
 func verifyGame(game *Game) error {
 
-	for _, inning := range game.Innings {
+	for inningNum, inning := range game.Innings {
 
-		err := verifyInning(inning, game.NumPlayers())
+		err := verifyInning(inning, inningNum, game.NumPlayers())
 		if err != nil {
 			return err
 		}
@@ -37,7 +37,7 @@ func verifyGame(game *Game) error {
 
 //checkRoster is a helper function that ensures the provided Roster
 //is enough to field a team without forfeiting
-func verifyInning(inning *Inning, numPlayers int) error {
+func verifyInning(inning *Inning, inningNum, numPlayers int) error {
 
 	filledPositions, _ := inning.CountPlayersOnField()
 	if filledPositions < NumFieldPositions {
@@ -48,7 +48,7 @@ func verifyInning(inning *Inning, numPlayers int) error {
 
 	femaleCount, maleCount := inning.CountGenders()
 	if femaleCount < MinGenderCount || maleCount < MinGenderCount {
-		err := fmt.Errorf("Invalid gender assignment in this inning. females: %d/%d males %d/%d", femaleCount, MinGenderCount, maleCount, MinGenderCount)
+		err := fmt.Errorf("Invalid gender assignment in this inning. Inning %d, females: %d/%d males %d/%d", inningNum, femaleCount, MinGenderCount, maleCount, MinGenderCount)
 		gender := MaleGender
 		if femaleCount < MinGenderCount {
 			gender = FemaleGender
