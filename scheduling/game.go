@@ -217,11 +217,11 @@ func (game *Game) ScheduleGame() error {
 						//Scale gender offset
 						if playerInfo.IsFemale() {
 							// old := scoringMtx[playerIdx][posIdx]
-							scoringMtx[playerIdx][posIdx] += femaleGenderOffset
+							scoringMtx[playerIdx][posIdx] += rand.Float64() * femaleGenderOffset
 							// fmt.Println("Female", old, scoringMtx[playerIdx][posIdx], femaleGenderOffset)
 						} else {
 							// old := scoringMtx[playerIdx][posIdx]
-							scoringMtx[playerIdx][posIdx] += maleGenderOffset
+							scoringMtx[playerIdx][posIdx] += rand.Float64() * maleGenderOffset
 							// fmt.Println("Male", old, scoringMtx[playerIdx][posIdx], maleGenderOffset)
 						}
 
