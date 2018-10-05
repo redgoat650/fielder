@@ -1,4 +1,4 @@
-package fielder
+package main
 
 import (
 	"fmt"
