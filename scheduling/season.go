@@ -1,12 +1,17 @@
 package fielder
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
+	"os"
 	"strings"
 )
 
 //Season is a struct for describing the Season for a Team.
 type Season struct {
+	Desc string
+
 	Team  *Team
 	Games []*Game
 }
@@ -19,12 +24,22 @@ func NewSeason(numGames int, inningsPerGame int) *Season {
 
 	season.Games = make([]*Game, 0)
 	for gameNum := 0; gameNum < numGames; gameNum++ {
-		season.Games = append(season.Games, NewGame(inningsPerGame))
+		season.Games = append(season.Games, NewGame(inningsPerGame, gameNum))
 	}
 
 	season.Team = NewTeam()
 
 	return season
+}
+
+func (season *Season) AddGame(innings int, startTime, oppTeam, gameDetails string) {
+
+	game := NewGame(innings, len(season.Games))
+	game.SetStartStr(startTime)
+	game.SetOppTeam(oppTeam)
+	game.SetGameDetails(gameDetails)
+	season.Games = append(season.Games, game)
+
 }
 
 //ScheduleAllGames schedules the all games in the season for the provided
@@ -62,6 +77,11 @@ func (season *Season) ScheduleAllGames() error {
 //schedule for the season in a human-readable form
 func (season Season) String() string {
 	str := new(strings.Builder)
+
+	str.WriteString("Season:\n")
+	str.WriteString(season.Desc)
+	str.WriteString("\n")
+
 	for gameNum, game := range season.Games {
 
 		str.WriteString(fmt.Sprintf("Game %d:\n", gameNum))
@@ -72,4 +92,58 @@ func (season Season) String() string {
 
 	}
 	return str.String()
+}
+
+func (season *Season) SaveToFile(filename string) error {
+
+	for i, _ := range season.Games {
+		season.Games[i].Self = nil
+	}
+
+	buf := new(bytes.Buffer)
+
+	encErr := gob.NewEncoder(buf).Encode(season)
+	if encErr != nil {
+		return encErr
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+
+	i := 0
+	n := 0
+	for {
+		n, err = file.Write(buf.Bytes()[i:])
+		if err != nil {
+			return err
+		}
+		i += n
+
+		if i >= len(buf.Bytes()) {
+			break
+		}
+	}
+
+	return nil
+
+}
+
+func LoadSeasonFromFile(filename string) (season *Season, err error) {
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return
+	}
+
+	loadSeason := &Season{}
+
+	err = gob.NewDecoder(file).Decode(loadSeason)
+
+	for i, v := range loadSeason.Games {
+		loadSeason.Games[i].Self = v
+	}
+
+	return loadSeason, err
 }

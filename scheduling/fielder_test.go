@@ -1,4 +1,4 @@
-package main
+package fielder
 
 import (
 	"fmt"
@@ -35,15 +35,15 @@ func TestScheduleGame(t *testing.T) {
 
 	for player, gender := range testPlayers {
 		newPlayer := NewPlayer(player, "blab", gender)
-		roster.players = append(roster.players, newPlayer)
+		roster.Players = append(roster.Players, newPlayer)
 	}
 
-	for _, v := range roster.players {
+	for _, v := range roster.Players {
 		fmt.Printf("%v\n", v)
 	}
 
 	innings := 5
-	game := NewGame(innings)
+	game := NewGame(innings, 0)
 	game.SetRoster(roster)
 	schedErr := game.ScheduleGame()
 	if schedErr != nil {
@@ -98,15 +98,15 @@ func TestPreferences(t *testing.T) {
 		if newPlayer.FirstName == "Sam" {
 			newPlayer.Pref = append(newPlayer.Pref, Pitcher)
 		}
-		roster.players = append(roster.players, newPlayer)
+		roster.Players = append(roster.Players, newPlayer)
 	}
 
-	for _, v := range roster.players {
+	for _, v := range roster.Players {
 		fmt.Printf("%v\n", v)
 	}
 
 	innings := 5
-	game := NewGame(innings)
+	game := NewGame(innings, 0)
 	game.SetRoster(roster)
 	schedErr := game.ScheduleGame()
 	if schedErr != nil {

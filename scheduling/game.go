@@ -12,16 +12,21 @@ type Game struct {
 	Innings []*Inning
 	Roster  *Roster
 
-	Time time.Time
+	Time     time.Time
+	TimeDesc string
+	OppTeam  string
+	Details  string
+	WeekNum  int
 
-	self *Game
+	Self *Game
 }
 
 //NewGame initializes a new Game with the provided number of innings
 //and returns its pointer
-func NewGame(innings int) *Game {
+func NewGame(innings int, weekNo int) *Game {
 	game := new(Game)
-	game.self = game
+	game.Self = game
+	game.Roster = NewRoster()
 
 	game.Innings = make([]*Inning, 0)
 
@@ -29,7 +34,19 @@ func NewGame(innings int) *Game {
 		game.Innings = append(game.Innings, NewInning())
 	}
 
+	game.WeekNum = weekNo
+
 	return game
+}
+
+func (game *Game) SetStartStr(startTime string) {
+	game.TimeDesc = startTime
+}
+func (game *Game) SetOppTeam(oppTeam string) {
+	game.OppTeam = oppTeam
+}
+func (game *Game) SetGameDetails(gameDetails string) {
+	game.Details = gameDetails
 }
 
 //SetRoster sets the roster for this game
@@ -40,13 +57,23 @@ func (game *Game) SetRoster(roster *Roster) {
 //String satisfies the stringer interface for Game
 func (game Game) String() string {
 
-	//Analysis of players in each position by inning
 	s := new(strings.Builder)
+	//Print game info:
+	s.WriteString(fmt.Sprintf("Game Week %d:\n", game.WeekNum))
+	s.WriteString(fmt.Sprintf("Time: %s\n", game.TimeDesc))
+	s.WriteString(fmt.Sprintf("Opposing Team: %s\n", game.OppTeam))
+	s.WriteString(fmt.Sprintf("Details: %s\n", game.Details))
+	s.WriteString("----------------\n")
+
+	//Analysis of players in each position by inning
 	for inningNum, inning := range game.Innings {
 
 		s.WriteString(fmt.Sprintf("Inning %d:\n", inningNum))
 
 		for pos, player := range inning.FieldPositions {
+			if player == nil {
+				panic("shouldn't have a nil position")
+			}
 			s.WriteString(fmt.Sprintf("%s: %s (%s)\n", pos, player.FirstName, player.Gender))
 		}
 
@@ -62,11 +89,11 @@ func (game Game) String() string {
 	leastInningsMale := len(game.Innings)
 	leastInningsFemale := len(game.Innings)
 
-	for _, player := range game.Roster.players {
+	for _, player := range game.Roster.Players {
 
 		inningsThisPlayer := 0
 
-		for inningNum, role := range player.Roles[game.self] {
+		for inningNum, role := range player.Roles[game.Self] {
 			s.WriteString(fmt.Sprintf("Inning %d: %s plays ", inningNum, player.FirstName))
 			if role == Bench {
 				s.WriteString(fmt.Sprintf("(%s)\n", role))
@@ -153,13 +180,13 @@ func (game *Game) ScheduleGame() error {
 
 	for {
 
-		for _, playerInfo := range game.Roster.players {
+		for _, playerInfo := range game.Roster.Players {
 			playerInfo.Roles[game] = make([]Position, game.NumInnings())
 		}
 
 		for inningNum, inning := range game.Innings {
 
-			inning.InitializeFieldPositions()
+			inning.DropFieldPositions()
 
 			initialMax := float64(0)
 
@@ -173,7 +200,7 @@ func (game *Game) ScheduleGame() error {
 					for posIdx := range playerScores {
 
 						//Initialize by seniority and skill
-						playerInfo := game.Roster.players[playerIdx]
+						playerInfo := game.Roster.Players[playerIdx]
 						scoringMtx[playerIdx][posIdx] += playerInfo.Seniority
 						scoringMtx[playerIdx][posIdx] += playerInfo.Skill
 
@@ -211,7 +238,7 @@ func (game *Game) ScheduleGame() error {
 				//Start with last inning's matrix
 				inning.mtx = game.Innings[inningNum-1].mtx.copy()
 
-				for playerIdx, playerInfo := range game.Roster.players {
+				for playerIdx, playerInfo := range game.Roster.Players {
 					if playerInfo.Roles[game][inningNum-1] == Bench {
 
 						//Player did not play last inning
@@ -252,7 +279,7 @@ func (game *Game) ScheduleGame() error {
 
 						if score >= initialMax {
 
-							playerInfo := game.Roster.players[playerIdx]
+							playerInfo := game.Roster.Players[playerIdx]
 							if assignedPlayers[playerInfo] {
 								//Player has already been assigned to another position
 								continue
@@ -279,7 +306,7 @@ func (game *Game) ScheduleGame() error {
 							break
 						}
 
-						if inning.FieldPositions[position] != nil {
+						if _, ok := inning.FieldPositions[position]; ok {
 							//We've already picked a player for this position
 							// fmt.Println("Already picked a player for position", position)
 							break
@@ -295,7 +322,7 @@ func (game *Game) ScheduleGame() error {
 						pickedListIdx := rand.Intn(len(playerIdxList))
 						pickedPlayerIdx := playerIdxList[pickedListIdx]
 
-						pickedPlayerInfo := game.Roster.players[pickedPlayerIdx]
+						pickedPlayerInfo := game.Roster.Players[pickedPlayerIdx]
 
 						// fmt.Println("Picked", pickedPlayerInfo.FirstName)
 
