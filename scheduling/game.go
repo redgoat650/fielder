@@ -162,7 +162,7 @@ const (
 	threshDelta     = float64(0.1)
 	benchCredit     = float64(1.0)
 	genderDelta     = float64(0.1)
-	retryThreshold  = 2500
+	retryThreshold  = 25000
 )
 
 //ScheduleGame is a Game method that schedules positions for all players
@@ -351,7 +351,7 @@ func (game *Game) ScheduleGame() error {
 
 		}
 
-		verErr := game.verify()
+		verErr := verifyGame(game)
 		if verErr == nil {
 			break
 		}
@@ -372,7 +372,7 @@ func (game *Game) ScheduleGame() error {
 		}
 	}
 
-	verifErr := game.verify()
+	verifErr := verifyGame(game)
 	if verifErr != nil {
 		panic(verifErr)
 	}
