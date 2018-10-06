@@ -1,5 +1,10 @@
 package fielder
 
+import (
+	"fmt"
+	"strings"
+)
+
 //Roster is a list of Players that will be participating
 //in a game
 type Roster struct {
@@ -43,4 +48,12 @@ func (roster *Roster) CountGenders() (female, male int) {
 
 	return
 
+}
+
+func (roster Roster) String() string {
+	str := new(strings.Builder)
+	for player := range roster.Players {
+		str.WriteString(fmt.Sprintf("%s", player))
+	}
+	return str.String()
 }

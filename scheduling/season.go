@@ -27,7 +27,7 @@ func NewSeason(numGames int, inningsPerGame int) *Season {
 		season.Games = append(season.Games, NewGame(inningsPerGame, gameNum))
 	}
 
-	season.Team = NewTeam()
+	season.Team = NewTeam("")
 
 	return season
 }

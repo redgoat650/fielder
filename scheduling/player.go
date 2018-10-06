@@ -1,6 +1,9 @@
 package fielder
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 //Player is a struct for storing the information and scheduling
 //information for each player
@@ -71,3 +74,12 @@ const (
 	MaleGender
 	NumGenders int = iota
 )
+
+func (player Player) String() string {
+	str := new(strings.Builder)
+
+	str.WriteString(fmt.Sprintf("%s %s, %s\n", player.FirstName, player.LastName, player.Gender))
+
+	return str.String()
+
+}

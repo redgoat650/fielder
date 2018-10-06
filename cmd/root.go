@@ -11,7 +11,8 @@ import (
 
 var (
 	filename string
-	gSeason  *fielder.Season
+	// gSeason  *fielder.Season
+	gTeam *fielder.Team
 )
 
 var rootCmd = &cobra.Command{
@@ -29,7 +30,7 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("No filename provided")
 		}
 
-		gSeason, err = fielder.LoadSeasonFromFile(filename)
+		gTeam, err = fielder.LoadTeamFromFile(filename)
 		return err
 
 	},
@@ -42,9 +43,9 @@ var rootCmd = &cobra.Command{
 		if filename != "" {
 			fmt.Println("saving season to file", filename)
 
-			err = gSeason.SaveToFile(filename)
+			err = fielder.SaveTeamToFile(gTeam, filename)
 		} else {
-			fmt.Println(gSeason)
+			fmt.Println(gTeam)
 		}
 
 		return
