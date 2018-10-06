@@ -158,7 +158,7 @@ func (game *Game) NumInnings() int {
 
 const (
 	maxPreferences  = 3
-	prefScaleFactor = float64(0.2)
+	prefScaleFactor = float64(0.6)
 	threshDelta     = float64(0.1)
 	benchCredit     = float64(1.0)
 	genderDelta     = float64(0.01)
@@ -197,6 +197,9 @@ func (game *Game) ScheduleGame() error {
 				scoringMtx := inning.mtx.PlayerInfoMap
 				for playerInfo, playerPosScores := range scoringMtx {
 
+					//Normalize player preferences
+					playerInfo.normalizePrefs()
+
 					for pos := range playerPosScores {
 
 						//Initialize by seniority and skill
@@ -204,11 +207,10 @@ func (game *Game) ScheduleGame() error {
 						scoringMtx[playerInfo][pos] += playerInfo.Skill
 
 						//Initialize by player preference
-						for prefRank, pref := range playerInfo.Pref {
+						for pref, prefStrength := range playerInfo.PrefNorm {
 							if pref == pos {
-								// old := scoringMtx[playerIdx][posIdx]
-								scoringMtx[playerInfo][pos] += (maxPreferences - float64(prefRank)) * prefScaleFactor
-								// fmt.Println(playerInfo.FirstName, "OLD", old, "NEW", scoringMtx[playerIdx][posIdx])
+								//Pref strength is a normalized factor between 0 and 1
+								scoringMtx[playerInfo][pos] += prefStrength * prefScaleFactor
 							}
 						}
 
@@ -292,7 +294,7 @@ func (game *Game) ScheduleGame() error {
 
 							listOfPlayerIdxsAboveThresholdByPosition[pos][playerInfo] = struct{}{}
 
-							// fmt.Printf("Player %s is a candidate for position %v because score %f >= threshold %f\n", playerInfo.FirstName, posIdx2Position(posIdx), score, initialMax)
+							// fmt.Printf("Player %s is a candidate for position %v because score %f >= threshold %f\n", playerInfo.FirstName, pos, score, initialMax)
 						}
 
 					}
@@ -305,14 +307,14 @@ func (game *Game) ScheduleGame() error {
 					for {
 
 						if len(playerListAtPos) == 0 {
-							// fmt.Println("Couldn't find a suitable candidate for", position)
+							// fmt.Println("Couldn't find a suitable candidate for", pos)
 							//Couldn't find a suitable candidate at this threshold level
 							break
 						}
 
 						if _, ok := inning.FieldPositions[pos]; ok {
 							//We've already picked a player for this position
-							// fmt.Println("Already picked a player for position", position)
+							// fmt.Println("Already picked a player for position", pos)
 							break
 						}
 
@@ -332,7 +334,7 @@ func (game *Game) ScheduleGame() error {
 
 						if assignedPlayers[pickedPlayerInfo] {
 							//Try the next player in the list of candidates
-							// fmt.Println("Player already assigned for position", position, "...try next")
+							// fmt.Println("Player already assigned for position", pos, "...try next")
 							continue
 						}
 
@@ -340,7 +342,7 @@ func (game *Game) ScheduleGame() error {
 						assignedPlayers[pickedPlayerInfo] = true
 						inning.FieldPositions[pos] = pickedPlayerInfo
 
-						// fmt.Printf("Picked player %s (%s) to play in position %v for inning %d\n", pickedPlayerInfo.FirstName, pickedPlayerInfo.Gender, position, inningNum)
+						// fmt.Printf("Picked player %s (%s) to play in position %v for inning %d\n", pickedPlayerInfo.FirstName, pickedPlayerInfo.Gender, pos, inningNum)
 						break
 					}
 
@@ -377,6 +379,26 @@ func (game *Game) ScheduleGame() error {
 	if verifErr != nil {
 		panic(verifErr)
 	}
+
+	return nil
+}
+
+func (game *Game) ScoreGame() float64 {
+
+	score := 0.0
+
+	// for player := range game.Roster.Players {
+	// 	// for inningNum, pos := range player.Roles[game] {
+
+	// 	// }
+	// }
+
+	return score
+}
+
+//ScheduleGame2 is a Game method that schedules positions for all players
+//in the Game roster.
+func (game *Game) ScheduleGame2() error {
 
 	return nil
 }

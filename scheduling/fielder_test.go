@@ -2,6 +2,9 @@ package fielder
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"testing"
 )
 
@@ -30,6 +33,9 @@ var testPlayers = map[string]PlayerGender{
 }
 
 func TestScheduleGame(t *testing.T) {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	roster := NewRoster()
 
@@ -84,19 +90,19 @@ func TestPreferences(t *testing.T) {
 	for player, gender := range testPlayers {
 		newPlayer := NewPlayer(player, "blab", gender)
 		if newPlayer.FirstName == "Nick" {
-			newPlayer.Pref = append(newPlayer.Pref, Third)
+			newPlayer.Pref[Third] = 1.0
 		}
 		if newPlayer.FirstName == "Cody" {
-			newPlayer.Pref = append(newPlayer.Pref, First)
+			newPlayer.Pref[First] = 1.0
 		}
 		if newPlayer.FirstName == "Rob" {
-			newPlayer.Pref = append(newPlayer.Pref, Catcher)
+			newPlayer.Pref[Catcher] = 1.0
 		}
 		if newPlayer.FirstName == "Craig" {
-			newPlayer.Pref = append(newPlayer.Pref, Pitcher)
+			newPlayer.Pref[Pitcher] = 1.0
 		}
 		if newPlayer.FirstName == "Sam" {
-			newPlayer.Pref = append(newPlayer.Pref, Pitcher)
+			newPlayer.Pref[Pitcher] = 1.0
 		}
 		roster.AddPlayer(newPlayer)
 	}

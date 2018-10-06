@@ -14,7 +14,8 @@ type Player struct {
 	Phone     string
 	Gender    PlayerGender
 
-	Pref      []Position
+	Pref      map[Position]int
+	PrefNorm  map[Position]float64
 	Seniority float64
 	Skill     float64
 
@@ -31,13 +32,55 @@ func NewPlayer(first, last string, gender PlayerGender) *Player {
 	p.LastName = last
 	p.Gender = gender
 
-	p.Pref = make([]Position, 0)
-	// p.Roles = make([]Position, 0)
+	p.Pref = make(map[Position]int)
+
+	//Initialize the preferences table
+	for _, pos := range fieldPosList {
+		p.Pref[pos] = 0.0
+	}
+
+	p.PrefNorm = make(map[Position]float64)
 	p.Roles = make(map[*Game][]Position)
 	p.scoreByInning = make([]float64, 0)
 	p.Attendance = make(map[*Game]bool)
 
 	return p
+}
+
+func (player *Player) normalizePrefs() {
+	max := 0.0
+	min := 0.0
+	minSet := false
+	for _, prefStrength := range player.Pref {
+
+		strFloat := float64(prefStrength)
+		if strFloat > max {
+			max = strFloat
+		}
+		if !minSet || strFloat < min {
+			minSet = true
+			min = strFloat
+		}
+	}
+
+	for pos, val := range player.Pref {
+
+		if max == min {
+			player.PrefNorm[pos] = 0.0
+			continue
+		}
+
+		player.PrefNorm[pos] = (float64(val) - min) / (float64(max) - min)
+
+		//Checks on output
+		if player.PrefNorm[pos] > 1.0 {
+			panic("Normalization error: Preference overflows expected max")
+		}
+		if player.PrefNorm[pos] < 0.0 {
+			panic("Normalization error: Preference underflows expected min")
+		}
+	}
+
 }
 
 //IsFemale is a helper method for Player that returns whether
