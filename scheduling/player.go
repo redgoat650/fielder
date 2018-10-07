@@ -66,7 +66,7 @@ func (player *Player) normalizePrefs() {
 	for pos, val := range player.Pref {
 
 		if max == min {
-			player.PrefNorm[pos] = 0.0
+			player.PrefNorm[pos] = 1.0
 			continue
 		}
 

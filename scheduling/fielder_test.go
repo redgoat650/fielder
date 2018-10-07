@@ -121,3 +121,48 @@ func TestPreferences(t *testing.T) {
 
 	fmt.Println(game)
 }
+
+func TestPreferencesNewScheduler(t *testing.T) {
+
+	roster := NewRoster()
+
+	for player, gender := range testPlayers {
+		newPlayer := NewPlayer(player, "blab", gender)
+		if newPlayer.FirstName == "Nick" {
+			newPlayer.Pref[Third] = 1.0
+		}
+		if newPlayer.FirstName == "Cody" {
+			newPlayer.Pref[First] = 1.0
+		}
+		if newPlayer.FirstName == "Rob" {
+			newPlayer.Pref[Catcher] = 1.0
+		}
+		if newPlayer.FirstName == "Craig" {
+			newPlayer.Pref[Pitcher] = 1.0
+		}
+		if newPlayer.FirstName == "Sam" {
+			newPlayer.Pref[Pitcher] = 1.0
+		}
+		if newPlayer.FirstName == "Patty" {
+			newPlayer.Pref[RShort] = 1.0
+			newPlayer.Pref[LShort] = 1.0
+			newPlayer.Pref[Pitcher] = -8
+
+		}
+		roster.AddPlayer(newPlayer)
+	}
+
+	for v := range roster.Players {
+		fmt.Printf("%v\n", v)
+	}
+
+	innings := 5
+	game := NewGame(innings, 0)
+	game.SetRoster(roster)
+	schedErr := game.ScheduleGame2()
+	if schedErr != nil {
+		panic(schedErr)
+	}
+
+	fmt.Println(game)
+}
