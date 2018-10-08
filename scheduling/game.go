@@ -494,7 +494,7 @@ func (game *ScratchGame) verifyGame(femaleLookup []bool) error {
 	return nil
 }
 
-func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]int, skillLookup []float64) float64 {
+func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]int, skillLookup []float64, seniorityLookup []float64) float64 {
 
 	numPlayers := len(prefLookup)
 	inningsPlayedLookup := make([]int, numPlayers)
@@ -517,6 +517,8 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]
 
 			skillFactor := skillLookup[playerIdxAtPosition]
 
+			seniorityFactor := seniorityLookup[playerIdxAtPosition]
+
 			// inningDistanceFactor := 0.2
 			// inningDistance := game.numInnings
 			// for checkInn := 0; checkInn < game.numInnings; checkInn++ {
@@ -534,7 +536,8 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]
 			playBonusScale := 6.0
 			prefScoreScale := 6.0
 			skillFactorScale := 1.0
-			sum := playBonusScale + prefScoreScale + skillFactorScale
+			seniorityFactorScale := 1.0
+			sum := playBonusScale + prefScoreScale + skillFactorScale + seniorityFactorScale
 
 			//Player is happier if
 			//1. they play in an inning
@@ -542,7 +545,8 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]
 			//3. they have played fewer innings already
 			playerScoreThisInn := (playingBonus*playBonusScale/sum +
 				prefScore*prefScoreScale/sum +
-				skillFactor*skillFactorScale/sum)
+				skillFactor*skillFactorScale/sum +
+				seniorityFactor*seniorityFactorScale/sum)
 
 			playerScoreScaledByPlayTime := playerScoreThisInn * math.Pow(participationPenaltyFactor, float64(innPlayed))
 
@@ -575,6 +579,7 @@ func (game *Game) ScheduleGame2() error {
 	//playerIdx -> posIdx -> score
 	prefLookup := make([][]float64, game.Roster.NumPlayers())
 	skillLookup := make([]float64, game.Roster.NumPlayers())
+	seniorityLookup := make([]float64, game.Roster.NumPlayers())
 
 	genderFemaleLookup := make([]bool, game.Roster.NumPlayers())
 	malePlayerIdxList := make([]int, 0)
@@ -596,6 +601,7 @@ func (game *Game) ScheduleGame2() error {
 		}
 
 		skillLookup[i] = player.Skill
+		seniorityLookup[i] = player.Seniority
 
 		isFemale := player.IsFemale()
 		genderFemaleLookup[i] = isFemale
@@ -658,7 +664,7 @@ func (game *Game) ScheduleGame2() error {
 
 	}
 
-	oldScore := scratchGame.ScoreGame(prefLookup, playerTakenTable, skillLookup)
+	oldScore := scratchGame.ScoreGame(prefLookup, playerTakenTable, skillLookup, seniorityLookup)
 	callConvergeAt := 100000
 
 	convCount := 0
@@ -693,7 +699,7 @@ func (game *Game) ScheduleGame2() error {
 		playerTakenTable[pickRandInningNum][swapPlayer] = newPlayerPrevPosIdx
 
 		//Recalculate score
-		newScore := scratchGame.ScoreGame(prefLookup, playerTakenTable, skillLookup)
+		newScore := scratchGame.ScoreGame(prefLookup, playerTakenTable, skillLookup, seniorityLookup)
 
 		//increment attempts at convergence
 		convCount++
