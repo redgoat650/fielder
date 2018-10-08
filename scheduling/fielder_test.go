@@ -130,23 +130,29 @@ func TestPreferencesNewScheduler(t *testing.T) {
 		newPlayer := NewPlayer(player, "blab", gender)
 		if newPlayer.FirstName == "Nick" {
 			newPlayer.Pref[Third] = 1.0
+			newPlayer.Skill = 1.0
 		}
 		if newPlayer.FirstName == "Cody" {
 			newPlayer.Pref[First] = 1.0
+			newPlayer.Skill = 1.0
 		}
 		if newPlayer.FirstName == "Rob" {
 			newPlayer.Pref[Catcher] = 1.0
+			newPlayer.Skill = 1.0
 		}
 		if newPlayer.FirstName == "Craig" {
 			newPlayer.Pref[Pitcher] = 1.0
+			newPlayer.Skill = 1.0
 		}
 		if newPlayer.FirstName == "Sam" {
 			newPlayer.Pref[Pitcher] = 1.0
+			newPlayer.Skill = 0.2
 		}
 		if newPlayer.FirstName == "Patty" {
 			newPlayer.Pref[RShort] = 1.0
 			newPlayer.Pref[LShort] = 1.0
 			newPlayer.Pref[Pitcher] = -8
+			newPlayer.Skill = 1.0
 
 		}
 		roster.AddPlayer(newPlayer)
