@@ -121,7 +121,11 @@ const (
 func (player Player) String() string {
 	str := new(strings.Builder)
 
-	str.WriteString(fmt.Sprintf("%s %s, %s\n", player.FirstName, player.LastName, player.Gender))
+	str.WriteString(fmt.Sprintf("%s %s, %s, %s, %s\n", player.FirstName, player.LastName, player.Gender, player.Email, player.Phone))
+	for pref, val := range player.Pref {
+		str.WriteString(fmt.Sprintf("%s %d, ", pref, val))
+	}
+	str.WriteString("\n")
 
 	return str.String()
 
