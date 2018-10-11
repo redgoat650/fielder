@@ -28,6 +28,12 @@ func (roster *Roster) DropPlayer(player *Player) {
 	delete(roster.Players, player)
 }
 
+func (roster *Roster) Reset() {
+	for player := range roster.Players {
+		roster.DropPlayer(player)
+	}
+}
+
 //NumPlayers is a roster method that returns the number of players
 //currently in the Roster
 func (roster *Roster) NumPlayers() int {

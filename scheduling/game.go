@@ -172,7 +172,7 @@ func (game *Game) ScheduleGame() error {
 
 	err := checkRoster(game.Roster)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	tries := 0

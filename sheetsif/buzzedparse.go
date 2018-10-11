@@ -86,16 +86,31 @@ func main() {
 		log.Fatalf("Unable to retrieve Sheets client: %v", err)
 	}
 
-	spreadsheetId := "1y-CzFJ9HgrW1M_nAn6HG8dBzU0PXVJ9hYpS62XnV1tI"
+	spreadsheetID := "1y-CzFJ9HgrW1M_nAn6HG8dBzU0PXVJ9hYpS62XnV1tI"
 
-	fmt.Println(getPlayerInfo(srv, spreadsheetId))
+	season, seasonParseErr := parseSeason(srv, spreadsheetID)
+	if seasonParseErr != nil {
+		panic(seasonParseErr)
+	}
+
+	schedErr := season.ScheduleAllGames()
+	if schedErr != nil {
+		fmt.Println(schedErr.Error())
+	}
+
+	fmt.Println(season)
 }
 
-func getPlayerInfo(srv *sheets.Service, ssid string) ([]*fielder.Player, error) {
+var (
+	WillNotAttendString = "No :("
+)
 
-	players := make([]*fielder.Player, 0)
+func parseSeason(srv *sheets.Service, ssid string) (*fielder.Season, error) {
 
-	readRange := "Weekly Roster!A3:D23"
+	numGames := 8
+	season := fielder.NewSeason(numGames, 5)
+
+	readRange := "Weekly Roster!A2:L23"
 	resp, err := srv.Spreadsheets.Values.Get(ssid, readRange).Do()
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve data from sheet: %v", err)
@@ -104,7 +119,26 @@ func getPlayerInfo(srv *sheets.Service, ssid string) ([]*fielder.Player, error) 
 	if len(resp.Values) == 0 {
 		panic("No name data found in range.")
 	} else {
-		for _, row := range resp.Values {
+		for rowNum, row := range resp.Values {
+
+			fmt.Println(len(row))
+
+			gameColStart := 4
+
+			gameColEnd := gameColStart + numGames
+			if gameColEnd >= len(row) {
+				gameColEnd = len(row)
+			}
+			gameCols := row[gameColStart:gameColEnd]
+
+			if rowNum == 0 {
+
+				for gameNo, game := range season.Games {
+					game.TimeDesc = gameCols[gameNo].(string)
+				}
+
+				continue
+			}
 
 			// Print columns A and E, which correspond to indices 0 and 4.
 			fullName := row[0]
@@ -143,7 +177,15 @@ func getPlayerInfo(srv *sheets.Service, ssid string) ([]*fielder.Player, error) 
 				player.Email = row[3].(string)
 			}
 
-			players = append(players, player)
+			for gameNo, game := range season.Games {
+				if gameNo >= len(gameCols) || gameCols[gameNo] != WillNotAttendString {
+					fmt.Printf("%s playing game %d\n", player.FirstName, gameNo)
+					// season.Games[gameNo].Roster.AddPlayer(player)
+					player.Attendance[game] = true
+				}
+			}
+
+			season.Team.AddPlayer(player)
 		}
 	}
 
@@ -163,7 +205,7 @@ func getPlayerInfo(srv *sheets.Service, ssid string) ([]*fielder.Player, error) 
 		first := names[0]
 		last := names[1]
 
-		for _, player := range players {
+		for player := range season.Team.Players.Players {
 			if player.FirstName == first {
 				if player.LastName == last {
 					//Found player - update their prefs
@@ -184,7 +226,7 @@ func getPlayerInfo(srv *sheets.Service, ssid string) ([]*fielder.Player, error) 
 
 	}
 
-	return players, nil
+	return season, nil
 
 }
 

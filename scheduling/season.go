@@ -50,9 +50,10 @@ func (season *Season) ScheduleAllGames() error {
 		panic("No team for this season")
 	}
 
-	for _, game := range season.Games {
+	for gameNo, game := range season.Games {
 
-		gameRoster := NewRoster()
+		gameRoster := game.Roster
+		gameRoster.Reset()
 
 		//Add players to the roster if they're marked as attending
 		for player := range season.Team.Active.Players {
@@ -61,12 +62,12 @@ func (season *Season) ScheduleAllGames() error {
 			}
 		}
 
-		//Schedule this game
-		game.SetRoster(gameRoster)
+		// Schedule this game
+		// game.SetRoster(gameRoster)
 
-		gameSchedErr := game.ScheduleGame()
+		gameSchedErr := game.ScheduleGame2()
 		if gameSchedErr != nil {
-			return gameSchedErr
+			fmt.Println("Game", gameNo, gameSchedErr.Error())
 		}
 
 	}
