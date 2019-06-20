@@ -12,3 +12,6 @@
 *.out
 credentials.json
 sheetsif/token.json
+
+# MaterialUI examples
+/fielder-ui/scratch/*
