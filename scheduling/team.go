@@ -41,11 +41,18 @@ func (team *Team) AddPlayer(player *Player) {
 
 func SaveTeamToFile(team *Team, filename string) error {
 
-	for _, season := range team.SeasonList {
-		for i, _ := range season.Games {
-			season.Games[i].Self = nil
-		}
-	}
+	// for _, season := range team.SeasonList {
+	// 	for i, _ := range season.Games {
+	// 		season.Games[i].Self = nil
+	// 	}
+	// }
+
+	// d, err := yaml.Marshal(team)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// path := storage.GetTeamDirectory(team.TeamName)
 
 	buf := new(bytes.Buffer)
 
@@ -74,7 +81,6 @@ func SaveTeamToFile(team *Team, filename string) error {
 	}
 
 	return nil
-
 }
 
 func LoadTeamFromFile(filename string) (team *Team, err error) {
