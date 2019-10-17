@@ -199,8 +199,9 @@ func getPrefListByName(pref [][]string, name string) ([]string, error) {
 		return nil, err
 	}
 	for i, checkName := range nameList {
+		rowNum := prefHeaderOffset + 1 + i
 		if name == checkName {
-			return getPrefStrsByIdx(pref, i)
+			return getPrefStrsByIdx(pref, rowNum)
 		}
 	}
 	return nil, fmt.Errorf("Name %v not found in preferences list", name)

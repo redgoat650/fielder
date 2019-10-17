@@ -512,7 +512,7 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]
 
 			innPlayed := inningsPlayedLookup[playerIdxAtPosition]
 
-			participationPenaltyFactor := 0.9
+			participationPenaltyFactor := 0.3
 			playingBonus := 1.0
 
 			skillFactor := skillLookup[playerIdxAtPosition]
