@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	fielder "github.com/redgoat650/fielder/scheduling"
 	"github.com/spf13/cobra"
@@ -21,36 +20,36 @@ var rootCmd = &cobra.Command{
 	Long: `A scheduler that distributes players into positions on the field
 		based on preference, seniority, and equal playing time.`,
 	Args: cobra.MinimumNArgs(1),
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
+	// PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 
-		if strings.Contains(cmd.CommandPath(), "create") {
-			return nil
-		}
-		if filename == "" {
-			return fmt.Errorf("No filename provided")
-		}
+	// 	if strings.Contains(cmd.CommandPath(), "create") {
+	// 		return nil
+	// 	}
+	// 	if filename == "" {
+	// 		return fmt.Errorf("No filename provided")
+	// 	}
 
-		gTeam, err = fielder.LoadTeamFromFile(filename)
-		return err
+	// 	gTeam, err = fielder.LoadTeamFromFile(filename)
+	// 	return err
 
-	},
-	PersistentPostRunE: func(cmd *cobra.Command, args []string) (err error) {
+	// },
+	// PersistentPostRunE: func(cmd *cobra.Command, args []string) (err error) {
 
-		if strings.Contains(cmd.CommandPath(), "print") {
-			return nil
-		}
+	// 	if strings.Contains(cmd.CommandPath(), "print") {
+	// 		return nil
+	// 	}
 
-		if filename != "" {
-			fmt.Println("saving season to file", filename)
+	// 	if filename != "" {
+	// 		fmt.Println("saving season to file", filename)
 
-			err = fielder.SaveTeamToFile(gTeam, filename)
-		} else {
-			fmt.Println(gTeam)
-		}
+	// 		err = fielder.SaveTeamToFile(gTeam, filename)
+	// 	} else {
+	// 		fmt.Println(gTeam)
+	// 	}
 
-		return
+	// 	return
 
-	},
+	// },
 }
 
 func Execute() {

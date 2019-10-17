@@ -39,21 +39,42 @@ func (pos Position) String() string {
 	case Third:
 		return "Third"
 	case LShort:
-		return "LShort"
+		return "Left Shortstop"
 	case RShort:
-		return "RShort"
+		return "Right Shortstop"
 	case LField:
-		return "LField"
+		return "Left Field"
 	case LCenter:
-		return "LCenter"
+		return "Left Center"
 	case RCenter:
-		return "RCenter"
+		return "Right Center"
 	case RField:
-		return "RField"
+		return "Right Field"
 	default:
 		return "Not a position"
 	}
+}
 
+func ParsePositionStr(posStr string) (Position, error) {
+	for _, checkPos := range []Position{
+		Bench,
+		Pitcher,
+		Catcher,
+		First,
+		Second,
+		Third,
+		LShort,
+		RShort,
+		LField,
+		LCenter,
+		RCenter,
+		RField,
+	} {
+		if checkPos.String() == posStr {
+			return checkPos, nil
+		}
+	}
+	return Bench, fmt.Errorf("Can't parse position string %v", posStr)
 }
 
 //posIdx2Position converts a position index to a Position value,

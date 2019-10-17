@@ -618,7 +618,7 @@ func (game *Game) ScheduleGame2() error {
 
 	//Start filling in stuff
 
-	numInnings := 5
+	numInnings := game.NumInnings()
 	scratchGame := NewScratchGame(numInnings)
 
 	//Fill the game with stuff:
@@ -665,7 +665,7 @@ func (game *Game) ScheduleGame2() error {
 	}
 
 	oldScore := scratchGame.ScoreGame(prefLookup, playerTakenTable, skillLookup, seniorityLookup)
-	callConvergeAt := 100000
+	callConvergeAt := 10000000
 
 	convCount := 0
 	for {
@@ -754,8 +754,6 @@ func (game *Game) fillFromScratch(scrGame *ScratchGame, playerLookup []*Player) 
 
 			game.Innings[inningNum].FieldPositions[pos] = player
 
-			fmt.Println(len(player.Roles))
-			fmt.Println(len(player.Roles[game]))
 			player.Roles[game][inningNum] = pos
 
 		}

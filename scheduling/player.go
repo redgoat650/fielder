@@ -113,10 +113,23 @@ func (gender PlayerGender) String() string {
 
 //List of PlayerGenders
 const (
-	FemaleGender PlayerGender = iota
+	InvalidGender PlayerGender = iota
+	FemaleGender
 	MaleGender
 	NumGenders int = iota
 )
+
+func ParseGenderString(genderStr string) (PlayerGender, error) {
+	for _, checkGender := range []PlayerGender{
+		FemaleGender,
+		MaleGender,
+	} {
+		if checkGender.String() == genderStr {
+			return checkGender, nil
+		}
+	}
+	return InvalidGender, fmt.Errorf("Unable to parse gender string %v", genderStr)
+}
 
 func (player Player) String() string {
 	str := new(strings.Builder)
