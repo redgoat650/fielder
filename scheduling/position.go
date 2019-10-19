@@ -2,6 +2,7 @@ package fielder
 
 import (
 	"fmt"
+	"strings"
 )
 
 //Position is a type that describes a field position
@@ -123,7 +124,7 @@ func ParsePositionGroupString(posStr string) ([]Position, error) {
 		TierFourPositions,
 		TierFivePositions,
 	} {
-		if checkPosGroup.String() == posStr {
+		if checkPosGroup.String() == posStr || strings.ReplaceAll(checkPosGroup.String(), " ", "") == posStr {
 			ps, ok := posGroup2Positions[checkPosGroup]
 			if !ok {
 				panic("Could not find position group definition")
