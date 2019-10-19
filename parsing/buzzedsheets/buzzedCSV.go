@@ -13,7 +13,9 @@ const (
 	numInnings = 7
 )
 
-func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, gameDate string) (*fielder.Game, error) {
+// ParseBuzzedSheets takes in a legacy buzzed style sheet in CSV format
+// and outputs a Game ready for scheduling on the specified day.
+func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, captCfgCSV, gameDate string) (*fielder.Game, error) {
 	schedule, err := parseCSVFile(scheduleCSVPath)
 	if err != nil {
 		return nil, err
@@ -28,6 +30,19 @@ func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, gameDate string) (*fi
 	if err != nil {
 		return nil, err
 	}
+
+	var cptPrefParsed [][]string
+	if captCfgCSV != "" {
+		err := createCptPrefIfNotExist(captCfgCSV, nameList)
+		if err != nil {
+			return nil, err
+		}
+		cptPrefParsed, err = parseCSVFile(captCfgCSV)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	numNames := len(nameList)
 	genderList, err := getGenderList(schedule, numNames)
 	if err != nil {
@@ -62,6 +77,14 @@ func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, gameDate string) (*fi
 			return nil, err
 		}
 		pl.Pref = playerPref
+
+		if cptPrefParsed != nil {
+			cptPref, err := getPreferences(cptPrefParsed, name)
+			if err != nil {
+				return nil, err
+			}
+			pl.CptPref = cptPref
+		}
 		gameRoster.AddPlayer(pl)
 	}
 
@@ -93,6 +116,43 @@ const (
 	emailHeaderStr    = "Email"
 	attendingSubStr   = "Yes"
 )
+
+func createCptPrefIfNotExist(filepath string, nameList []string) error {
+	_, err := os.Stat(filepath)
+	if err == nil {
+		return nil
+	}
+
+	f, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+
+	err = writePrefFileHeader(f)
+	if err != nil {
+		return err
+	}
+
+	for _, name := range nameList {
+		f.Write([]byte(fmt.Sprintf("%s,,,\n", name)))
+	}
+
+	return f.Close()
+}
+
+func writePrefFileHeader(f *os.File) error {
+	colHeadings := []string{
+		"Name",
+	}
+	for i := 0; i < numPrefSelections; i++ {
+		colHeadings = append(colHeadings, getPrefPosHeader(i))
+	}
+	_, err := f.Write([]byte(fmt.Sprintf("%v\n", strings.Join(colHeadings, ","))))
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func getColumnList(sheet [][]string, colTitle string, minNumRows int, headerRowOffset int) ([]string, error) {
 	headerRow := getHeaderRow(sheet, headerRowOffset)

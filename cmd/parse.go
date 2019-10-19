@@ -19,6 +19,7 @@ func init() {
 		scheduleCSV string
 		prefCSV     string
 		gameDate    string
+		cptPrefCSV  string
 	)
 
 	var buzzedCmd = &cobra.Command{
@@ -38,7 +39,7 @@ format legacy spreadsheet in CSV format.`,
 				return fmt.Errorf("No game date provided")
 			}
 
-			game, err := buzzedsheets.ParseBuzzedSheets(scheduleCSV, prefCSV, gameDate)
+			game, err := buzzedsheets.ParseBuzzedSheets(scheduleCSV, prefCSV, cptPrefCSV, gameDate)
 			if err != nil {
 				return err
 			}
@@ -55,6 +56,7 @@ format legacy spreadsheet in CSV format.`,
 	buzzedCmd.Flags().StringVarP(&scheduleCSV, "schedule", "s", "", "Path to schedule file")
 	buzzedCmd.Flags().StringVarP(&prefCSV, "preferences", "p", "", "Path to preferences file")
 	buzzedCmd.Flags().StringVarP(&gameDate, "gameDate", "d", "", "Date of the game to generate schedule data for")
+	buzzedCmd.Flags().StringVarP(&cptPrefCSV, "cptPref", "c", "", "Custom configuration file for finer control of player position preferences. If the file doesn't exist it will be created")
 
 	rootCmd.AddCommand(parseCmd)
 

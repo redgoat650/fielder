@@ -14,10 +14,12 @@ type Player struct {
 	Phone     string
 	Gender    PlayerGender
 
-	Pref      map[Position]int
-	PrefNorm  map[Position]float64
-	Seniority float64
-	Skill     float64
+	Pref        map[Position]int
+	PrefNorm    map[Position]float64
+	CptPref     map[Position]int
+	CptPrefNorm map[Position]float64
+	Seniority   float64
+	Skill       float64
 
 	Roles         map[*Game][]Position
 	scoreByInning []float64
@@ -40,6 +42,7 @@ func NewPlayer(first, last string, gender PlayerGender) *Player {
 	}
 
 	p.PrefNorm = make(map[Position]float64)
+	p.CptPrefNorm = make(map[Position]float64)
 	p.Roles = make(map[*Game][]Position)
 	p.scoreByInning = make([]float64, 0)
 	p.Attendance = make(map[*Game]bool)
@@ -77,6 +80,42 @@ func (player *Player) normalizePrefs() {
 			panic("Normalization error: Preference overflows expected max")
 		}
 		if player.PrefNorm[pos] < 0.0 {
+			panic("Normalization error: Preference underflows expected min")
+		}
+	}
+
+}
+
+func (player *Player) normalizeCptPrefs() {
+	max := 0.0
+	min := 0.0
+	minSet := false
+	for _, prefStrength := range player.CptPref {
+
+		strFloat := float64(prefStrength)
+		if strFloat > max {
+			max = strFloat
+		}
+		if !minSet || strFloat < min {
+			minSet = true
+			min = strFloat
+		}
+	}
+
+	for pos, val := range player.CptPref {
+
+		if max == min {
+			player.CptPrefNorm[pos] = 1.0
+			continue
+		}
+
+		player.CptPrefNorm[pos] = (float64(val) - min) / (float64(max) - min)
+
+		//Checks on output
+		if player.CptPrefNorm[pos] > 1.0 {
+			panic("Normalization error: Preference overflows expected max")
+		}
+		if player.CptPrefNorm[pos] < 0.0 {
 			panic("Normalization error: Preference underflows expected min")
 		}
 	}

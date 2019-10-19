@@ -508,7 +508,7 @@ func (game *ScratchGame) verifyGame(femaleLookup []bool) error {
 }
 
 // ScoreGame scores a scratch game
-func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]int, skillLookup []float64, seniorityLookup []float64) float64 {
+func (game *ScratchGame) ScoreGame(prefLookup [][]float64, cptPrefLookup [][]float64, playerTakenTable [][]int, skillLookup []float64, seniorityLookup []float64) float64 {
 
 	numPlayers := len(prefLookup)
 	inningsPlayedLookup := make([]int, numPlayers)
@@ -521,13 +521,12 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]
 			playerIdxAtPosition := game.GetPlayerIdxAtPos(inningNum, posIdx)
 
 			posPrefListForPlayer := prefLookup[playerIdxAtPosition]
+			cptPrefListForPlayer := cptPrefLookup[playerIdxAtPosition]
 
 			prefScore := posPrefListForPlayer[posIdx]
+			cptPrefScore := cptPrefListForPlayer[posIdx]
 
 			innPlayed := inningsPlayedLookup[playerIdxAtPosition]
-
-			participationPenaltyFactor := 0.3
-			playingBonus := 1.0
 
 			skillFactor := skillLookup[playerIdxAtPosition]
 
@@ -549,9 +548,12 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]
 
 			playBonusScale := 6.0
 			prefScoreScale := 6.0
+			cptPrefScoreScale := 6.0
 			skillFactorScale := 1.0
 			seniorityFactorScale := 1.0
-			sum := playBonusScale + prefScoreScale + skillFactorScale + seniorityFactorScale
+			participationPenaltyFactor := 0.3
+			playingBonus := 1.0
+			sum := playBonusScale + prefScoreScale + cptPrefScoreScale + skillFactorScale + seniorityFactorScale
 
 			//Player is happier if
 			//1. they play in an inning
@@ -559,6 +561,7 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]
 			//3. they have played fewer innings already
 			playerScoreThisInn := (playingBonus*playBonusScale/sum +
 				prefScore*prefScoreScale/sum +
+				cptPrefScore*cptPrefScoreScale/sum +
 				skillFactor*skillFactorScale/sum +
 				seniorityFactor*seniorityFactorScale/sum)
 
@@ -592,6 +595,7 @@ func (game *Game) ScheduleGame2() error {
 	// [] ([]float64)
 	//playerIdx -> posIdx -> score
 	prefLookup := make([][]float64, game.Roster.NumPlayers())
+	cptPrefLookup := make([][]float64, game.Roster.NumPlayers())
 	skillLookup := make([]float64, game.Roster.NumPlayers())
 	seniorityLookup := make([]float64, game.Roster.NumPlayers())
 
@@ -605,6 +609,7 @@ func (game *Game) ScheduleGame2() error {
 		playerLookup[i] = player
 
 		prefLookup[i] = make([]float64, NumFieldPositions)
+		cptPrefLookup[i] = make([]float64, NumFieldPositions)
 
 		player.normalizePrefs()
 		for pos, normMag := range player.PrefNorm {
@@ -612,6 +617,12 @@ func (game *Game) ScheduleGame2() error {
 			posIdx := position2PosIdx(pos)
 			prefLookup[i][posIdx] = normMag
 
+		}
+
+		player.normalizeCptPrefs()
+		for pos, cptPrefMag := range player.CptPrefNorm {
+			posIdx := position2PosIdx(pos)
+			cptPrefLookup[i][posIdx] = cptPrefMag
 		}
 
 		skillLookup[i] = player.Skill
@@ -678,8 +689,14 @@ func (game *Game) ScheduleGame2() error {
 
 	}
 
-	oldScore := scratchGame.ScoreGame(prefLookup, playerTakenTable, skillLookup, seniorityLookup)
-	callConvergeAt := 10000000
+	oldScore := scratchGame.ScoreGame(
+		prefLookup,
+		cptPrefLookup,
+		playerTakenTable,
+		skillLookup,
+		seniorityLookup,
+	)
+	callConvergeAt := 1000000
 
 	convCount := 0
 	for {
@@ -713,7 +730,13 @@ func (game *Game) ScheduleGame2() error {
 		playerTakenTable[pickRandInningNum][swapPlayer] = newPlayerPrevPosIdx
 
 		//Recalculate score
-		newScore := scratchGame.ScoreGame(prefLookup, playerTakenTable, skillLookup, seniorityLookup)
+		newScore := scratchGame.ScoreGame(
+			prefLookup,
+			cptPrefLookup,
+			playerTakenTable,
+			skillLookup,
+			seniorityLookup,
+		)
 
 		//increment attempts at convergence
 		convCount++

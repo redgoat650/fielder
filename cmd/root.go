@@ -52,6 +52,7 @@ var rootCmd = &cobra.Command{
 	// },
 }
 
+// Execute executes the command line framework
 func Execute() {
 
 	//Add args
