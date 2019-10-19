@@ -1,6 +1,8 @@
 package fielder
 
-import "fmt"
+import (
+	"fmt"
+)
 
 //Position is a type that describes a field position
 type Position int
@@ -95,4 +97,118 @@ func posIdx2Position(posIdx int) Position {
 //position2PosIdx returns the position index from an input Position
 func position2PosIdx(pos Position) int {
 	return int(pos) - 1
+}
+
+// ParsePositionGroupString parses a string for a position group
+func ParsePositionGroupString(posStr string) ([]Position, error) {
+	singlePos, err := ParsePositionStr(posStr)
+	if err == nil {
+		return []Position{singlePos}, nil
+	}
+
+	for _, checkPosGroup := range []PositionGroup{
+		Outfield,
+		Infield,
+		AnyBase,
+		AnyShort,
+		NoBase,
+		NoShort,
+		NotPitcher,
+		NotCatcher,
+		NotPitcherCatcher,
+		LiterallyAnything,
+		TierOnePositions,
+		TierTwoPositions,
+		TierThreePositions,
+		TierFourPositions,
+		TierFivePositions,
+	} {
+		if checkPosGroup.String() == posStr {
+			ps, ok := posGroup2Positions[checkPosGroup]
+			if !ok {
+				panic("Could not find position group definition")
+			}
+			return ps, nil
+		}
+	}
+	return nil, fmt.Errorf("Could not parse position group string %q", posStr)
+}
+
+// PositionGroup enumerates a named group of positions
+type PositionGroup int
+
+// Position group enumeration
+const (
+	InvalidPosGroup PositionGroup = iota
+	Outfield
+	Infield
+	AnyBase
+	AnyShort
+	NoBase
+	NoShort
+	NotPitcher
+	NotCatcher
+	NotPitcherCatcher
+	LiterallyAnything
+	TierOnePositions   // RF, LC
+	TierTwoPositions   // 2B, RS
+	TierThreePositions // LS, RC, LF
+	TierFourPositions  // 1B, 3B
+	TierFivePositions  // Pitcher, Catcher
+)
+
+var posGroup2Positions = map[PositionGroup][]Position{
+	Outfield:           []Position{RField, RCenter, LCenter, LField},
+	Infield:            []Position{First, RShort, Second, LShort, Third},
+	AnyBase:            []Position{First, Second, Third},
+	NoBase:             []Position{RShort, LShort, RField, RCenter, LCenter, LField},
+	AnyShort:           []Position{RShort, LShort},
+	NoShort:            []Position{First, Second, Third, RField, RCenter, LCenter, LField},
+	NotPitcher:         []Position{Catcher, First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
+	NotCatcher:         []Position{Pitcher, First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
+	NotPitcherCatcher:  []Position{First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
+	LiterallyAnything:  []Position{Pitcher, Catcher, First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
+	TierOnePositions:   []Position{RField, LCenter},
+	TierTwoPositions:   []Position{RShort, Second},
+	TierThreePositions: []Position{LShort, RCenter, LField},
+	TierFourPositions:  []Position{First, Third},
+	TierFivePositions:  []Position{Pitcher, Catcher},
+}
+
+// String stringifies the position group
+func (pg PositionGroup) String() string {
+	switch pg {
+	case Outfield:
+		return "Outfield"
+	case Infield:
+		return "Infield"
+	case AnyBase:
+		return "AnyBase"
+	case AnyShort:
+		return "Any Short"
+	case NoBase:
+		return "No Base"
+	case NoShort:
+		return "No Short"
+	case NotPitcher:
+		return "Not Pitcher"
+	case NotCatcher:
+		return "Not Catcher"
+	case NotPitcherCatcher:
+		return "Not Pitcher Catcher"
+	case LiterallyAnything:
+		return "Literally Anything"
+	case TierOnePositions:
+		return "Tier One Positions"
+	case TierTwoPositions:
+		return "Tier Two Positions"
+	case TierThreePositions:
+		return "Tier Three Positions"
+	case TierFourPositions:
+		return "Tier Four Positions"
+	case TierFivePositions:
+		return "Tier Five Positions"
+	default:
+		return "Invalid Position group"
+	}
 }

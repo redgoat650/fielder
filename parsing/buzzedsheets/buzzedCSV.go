@@ -179,12 +179,14 @@ func getPreferences(pref [][]string, name string) (map[fielder.Position]int, err
 
 	ret := make(map[fielder.Position]int)
 	for prefOrder, prefPos := range prefList {
-		pos, err := fielder.ParsePositionStr(prefPos)
+		posGroup, err := fielder.ParsePositionGroupString(prefPos)
 		if err != nil {
 			// Do nothing, whatever
 			continue
 		}
-		ret[pos] = getScore(prefOrder)
+		for _, pos := range posGroup {
+			ret[pos] = getScore(prefOrder)
+		}
 	}
 	return ret, nil
 }
