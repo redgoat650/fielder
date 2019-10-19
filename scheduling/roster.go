@@ -28,6 +28,7 @@ func (roster *Roster) DropPlayer(player *Player) {
 	delete(roster.Players, player)
 }
 
+// Reset rests a roster
 func (roster *Roster) Reset() {
 	for player := range roster.Players {
 		roster.DropPlayer(player)
@@ -56,6 +57,7 @@ func (roster *Roster) CountGenders() (female, male int) {
 
 }
 
+// String meets the stringer interface
 func (roster Roster) String() string {
 	str := new(strings.Builder)
 	for player := range roster.Players {

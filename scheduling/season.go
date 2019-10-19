@@ -32,6 +32,7 @@ func NewSeason(numGames int, inningsPerGame int) *Season {
 	return season
 }
 
+// AddGame adds a game to the Season
 func (season *Season) AddGame(innings int, startTime, oppTeam, gameDetails string) {
 
 	game := NewGame(innings, len(season.Games))
@@ -95,9 +96,10 @@ func (season Season) String() string {
 	return str.String()
 }
 
+// SaveToFile saves a Season to the given file name
 func (season *Season) SaveToFile(filename string) error {
 
-	for i, _ := range season.Games {
+	for i := range season.Games {
 		season.Games[i].Self = nil
 	}
 
@@ -131,6 +133,7 @@ func (season *Season) SaveToFile(filename string) error {
 
 }
 
+// LoadSeasonFromFile loads a Season from data in a given file name
 func LoadSeasonFromFile(filename string) (season *Season, err error) {
 
 	file, err := os.Open(filename)

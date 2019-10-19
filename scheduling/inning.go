@@ -45,6 +45,8 @@ var fieldPosList = []Position{
 // 	inning.FieldPositions[RCenter] = nil
 // 	inning.FieldPositions[RField] = nil
 // }
+
+// DropFieldPositions drops the field positions from the inning
 func (inning *Inning) DropFieldPositions() {
 	for i := range inning.FieldPositions {
 		delete(inning.FieldPositions, i)

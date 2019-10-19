@@ -119,6 +119,8 @@ const (
 	NumGenders int = iota
 )
 
+// ParseGenderString parses a string and returns a PlayerGender.
+// It is the complementary operation to PlayerGender.String()
 func ParseGenderString(genderStr string) (PlayerGender, error) {
 	for _, checkGender := range []PlayerGender{
 		FemaleGender,

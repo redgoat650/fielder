@@ -55,6 +55,8 @@ func (pos Position) String() string {
 	}
 }
 
+// ParsePositionStr parses a string and returns a Position.
+// It is the complimentary operation to Position.String()
 func ParsePositionStr(posStr string) (Position, error) {
 	for _, checkPos := range []Position{
 		Bench,

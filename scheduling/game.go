@@ -40,12 +40,17 @@ func NewGame(innings int, weekNo int) *Game {
 	return game
 }
 
+// SetStartStr sets the start time to the provided string
 func (game *Game) SetStartStr(startTime string) {
 	game.TimeDesc = startTime
 }
+
+// SetOppTeam sets the opponent team name
 func (game *Game) SetOppTeam(oppTeam string) {
 	game.OppTeam = oppTeam
 }
+
+// SetGameDetails sets the game details
 func (game *Game) SetGameDetails(gameDetails string) {
 	game.Details = gameDetails
 }
@@ -386,6 +391,7 @@ func (game *Game) ScheduleGame() error {
 	return nil
 }
 
+// ScoreGame calculates the score for a game
 func (game *Game) ScoreGame() float64 {
 
 	score := 0.0
@@ -422,21 +428,24 @@ func (game *Game) ScoreGame() float64 {
 //--------------------------------------------
 // Second Algorithm
 
+// ScratchGame is a scratch game
 type ScratchGame struct {
 	b          []int
 	numInnings int
 }
 
 const (
-	Unfilled = -1
+	//unfilled is a special value for describing an unfilled position
+	unfilled = -1
 )
 
+// NewScratchGame initializes and returns a pointer to a new ScratchGame
 func NewScratchGame(numInnings int) *ScratchGame {
 	s := new(ScratchGame)
 
 	s.b = make([]int, numInnings*NumFieldPositions)
 	for i := range s.b {
-		s.b[i] = Unfilled
+		s.b[i] = unfilled
 	}
 
 	s.numInnings = numInnings
@@ -444,8 +453,10 @@ func NewScratchGame(numInnings int) *ScratchGame {
 	return s
 }
 
+// ScratchInning is a scratch inning
 type ScratchInning []int
 
+// GetInning gets a ScratchInning from a ScratchGame by inning number
 func (game *ScratchGame) GetInning(inningNum int) ScratchInning {
 	return ScratchInning(game.b[inningNum*NumFieldPositions : (inningNum+1)*NumFieldPositions])
 }
@@ -467,6 +478,8 @@ func (game *ScratchGame) GetInning(inningNum int) ScratchInning {
 // 	NumFieldPosIdx int = iota
 // )
 
+// GetPlayerIdxAtPos gets a player index at a given position for a given
+// inning number
 func (game *ScratchGame) GetPlayerIdxAtPos(inningNum int, posIdx int) int {
 	return game.GetInning(inningNum)[posIdx]
 }
@@ -477,7 +490,7 @@ func (game *ScratchGame) verifyGame(femaleLookup []bool) error {
 		femaleCount := 0
 		for posIdx := 0; posIdx < NumFieldPositions; posIdx++ {
 			playerIdxAtPos := game.GetPlayerIdxAtPos(innNum, posIdx)
-			if playerIdxAtPos != Unfilled {
+			if playerIdxAtPos != unfilled {
 				if femaleLookup[playerIdxAtPos] {
 					femaleCount++
 				} else {
@@ -494,6 +507,7 @@ func (game *ScratchGame) verifyGame(femaleLookup []bool) error {
 	return nil
 }
 
+// ScoreGame scores a scratch game
 func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]int, skillLookup []float64, seniorityLookup []float64) float64 {
 
 	numPlayers := len(prefLookup)
@@ -524,7 +538,7 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, playerTakenTable [][]
 			// for checkInn := 0; checkInn < game.numInnings; checkInn++ {
 			// 	// if game.
 			// 	posInThisInning := playerTakenTable[checkInn][playerIdxAtPosition]
-			// 	if posInThisInning != Unfilled {
+			// 	if posInThisInning != unfilled {
 			// 		distFromThisInning := int(math.Abs(float64(inningNum - checkInn)))
 			// 		if inningDistance > distFromThisInning {
 			// 			inningDistance = distFromThisInning
@@ -628,7 +642,7 @@ func (game *Game) ScheduleGame2() error {
 		playerTakenTable[i] = make([]int, game.Roster.NumPlayers())
 		//Initialize to all players in untaken positions
 		for j := range playerTakenTable[i] {
-			playerTakenTable[i][j] = Unfilled
+			playerTakenTable[i][j] = unfilled
 		}
 	}
 
@@ -677,7 +691,7 @@ func (game *Game) ScheduleGame2() error {
 		pickRandPosition := pickRandFilledPosIdx(scratchInning)
 
 		swapPlayer := scratchInning[pickRandPosition]
-		if swapPlayer == Unfilled {
+		if swapPlayer == unfilled {
 			panic("How did we get an unfilled position?")
 		}
 		if swapPlayer == pickNewPlayer {
@@ -692,7 +706,7 @@ func (game *Game) ScheduleGame2() error {
 		playerTakenTable[pickRandInningNum][pickNewPlayer] = pickRandPosition
 
 		//Set the swapped player's position to the new player's old position
-		if newPlayerPrevPosIdx != Unfilled {
+		if newPlayerPrevPosIdx != unfilled {
 			scratchInning[newPlayerPrevPosIdx] = swapPlayer
 		}
 		//Update player taken table with swapped player's position
@@ -709,7 +723,7 @@ func (game *Game) ScheduleGame2() error {
 			scratchInning[pickRandPosition] = swapPlayer
 			playerTakenTable[pickRandInningNum][swapPlayer] = pickRandPosition
 
-			if newPlayerPrevPosIdx != Unfilled {
+			if newPlayerPrevPosIdx != unfilled {
 				scratchInning[newPlayerPrevPosIdx] = pickNewPlayer
 			}
 			playerTakenTable[pickRandInningNum][pickNewPlayer] = newPlayerPrevPosIdx
@@ -745,7 +759,7 @@ func (game *Game) fillFromScratch(scrGame *ScratchGame, playerLookup []*Player) 
 		for posIdx := 0; posIdx < NumFieldPositions; posIdx++ {
 
 			playerIdx := scrGame.GetPlayerIdxAtPos(inningNum, posIdx)
-			if playerIdx == Unfilled {
+			if playerIdx == unfilled {
 				continue
 			}
 
@@ -763,7 +777,7 @@ func (game *Game) fillFromScratch(scrGame *ScratchGame, playerLookup []*Player) 
 func pickRandFilledPosIdx(inn ScratchInning) int {
 	for {
 		randPosIdx := rand.Intn(len(inn))
-		if inn[randPosIdx] != Unfilled {
+		if inn[randPosIdx] != unfilled {
 			return randPosIdx
 		}
 	}
@@ -778,7 +792,7 @@ func pickRandAvailPlayerIdx(playerIdxList []int, playerPosTable []int, fillPos i
 	somethingAvail := false
 	for _, plIdx := range playerIdxList {
 
-		if playerPosTable[plIdx] == Unfilled {
+		if playerPosTable[plIdx] == unfilled {
 			somethingAvail = true
 			break
 		}
@@ -789,7 +803,7 @@ func pickRandAvailPlayerIdx(playerIdxList []int, playerPosTable []int, fillPos i
 
 	for {
 		pickIdx := pickRandPlayerIdx(playerIdxList)
-		if playerPosTable[pickIdx] == Unfilled {
+		if playerPosTable[pickIdx] == unfilled {
 			playerPosTable[pickIdx] = fillPos
 			return pickIdx, nil
 		}

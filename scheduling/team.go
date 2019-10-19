@@ -39,6 +39,7 @@ func (team *Team) AddPlayer(player *Player) {
 	team.Active.AddPlayer(player)
 }
 
+// SaveTeamToFile saves a team to a given file name
 func SaveTeamToFile(team *Team, filename string) error {
 
 	// for _, season := range team.SeasonList {
@@ -83,6 +84,7 @@ func SaveTeamToFile(team *Team, filename string) error {
 	return nil
 }
 
+// LoadTeamFromFile loads Team data from a given file name
 func LoadTeamFromFile(filename string) (team *Team, err error) {
 
 	file, err := os.Open(filename)
