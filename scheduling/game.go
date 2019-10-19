@@ -71,6 +71,12 @@ func (game Game) String() string {
 	s.WriteString(fmt.Sprintf("Details: %s\n", game.Details))
 	s.WriteString("----------------\n")
 
+	//Debug info on players
+	for player := range game.Roster.Players {
+		s.WriteString(player.String())
+		s.WriteString("----------------\n")
+	}
+
 	//Analysis of players in each position by inning
 	for inningNum, inning := range game.Innings {
 
@@ -140,6 +146,16 @@ func (game Game) String() string {
 		}
 
 	}
+
+	for _, pos := range fieldPosList {
+		s.WriteString(fmt.Sprintf("%v: ", pos))
+		pls := make([]string, 0)
+		for _, inning := range game.Innings {
+			pls = append(pls, inning.FieldPositions[pos].FirstName)
+		}
+		s.WriteString(fmt.Sprintf("%v\n", strings.Join(pls, ", ")))
+	}
+	s.WriteString("----------------\n")
 
 	s.WriteString(fmt.Sprintf("Most innings played by a player: %d\nLeast innings played by a player: %d\n", mostInnings, leastInnings))
 	s.WriteString(fmt.Sprintf("Most innings played by a FEMALE: %d\nLeast innings played by a FEMALE: %d\n", mostInningsFemale, leastInningsFemale))
@@ -551,7 +567,7 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, cptPrefLookup [][]flo
 			cptPrefScoreScale := 6.0
 			skillFactorScale := 1.0
 			seniorityFactorScale := 1.0
-			participationPenaltyFactor := 0.3
+			participationPenaltyFactor := 0.8
 			playingBonus := 1.0
 			sum := playBonusScale + prefScoreScale + cptPrefScoreScale + skillFactorScale + seniorityFactorScale
 

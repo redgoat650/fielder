@@ -32,9 +32,6 @@ format legacy spreadsheet in CSV format.`,
 			if scheduleCSV == "" {
 				return fmt.Errorf("No CSV schedule provided")
 			}
-			if prefCSV == "" {
-				return fmt.Errorf("No CSV preferences provided")
-			}
 			if gameDate == "" {
 				return fmt.Errorf("No game date provided")
 			}

@@ -21,14 +21,17 @@ func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, captCfgCSV, gameDate 
 		return nil, err
 	}
 
-	pref, err := parseCSVFile(preferenceCSVPath)
+	nameList, err := getNameList(schedule)
 	if err != nil {
 		return nil, err
 	}
 
-	nameList, err := getNameList(schedule)
-	if err != nil {
-		return nil, err
+	var pref [][]string
+	if preferenceCSVPath != "" {
+		pref, err = parseCSVFile(preferenceCSVPath)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var cptPrefParsed [][]string
@@ -72,18 +75,18 @@ func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, captCfgCSV, gameDate 
 		pl := fielder.NewPlayer(first, last, gender)
 		pl.Email = emailList[i]
 
-		playerPref, err := getPreferences(pref, name)
-		if err != nil {
-			return nil, err
-		}
-		pl.Pref = playerPref
-
-		if cptPrefParsed != nil {
-			cptPref, err := getPreferences(cptPrefParsed, name)
+		if pref != nil {
+			err := fillPreferences(pl.Pref, pref, name)
 			if err != nil {
 				return nil, err
 			}
-			pl.CptPref = cptPref
+		}
+
+		if cptPrefParsed != nil {
+			err := fillPreferences(pl.CptPref, cptPrefParsed, name)
+			if err != nil {
+				return nil, err
+			}
 		}
 		gameRoster.AddPlayer(pl)
 	}
@@ -245,10 +248,29 @@ func getPreferences(pref [][]string, name string) (map[fielder.Position]int, err
 			continue
 		}
 		for _, pos := range posGroup {
-			ret[pos] = getScore(prefOrder)
+			ret[pos] += getScore(prefOrder)
 		}
 	}
 	return ret, nil
+}
+
+func fillPreferences(in map[fielder.Position]int, pref [][]string, name string) error {
+	prefList, err := getPrefListByName(pref, name)
+	if err != nil {
+		return err
+	}
+
+	for prefOrder, prefPos := range prefList {
+		posGroup, err := fielder.ParsePositionGroupString(prefPos)
+		if err != nil {
+			// Do nothing, whatever
+			continue
+		}
+		for _, pos := range posGroup {
+			in[pos] += getScore(prefOrder)
+		}
+	}
+	return nil
 }
 
 func getScore(idx int) int {

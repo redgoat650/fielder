@@ -35,10 +35,12 @@ func NewPlayer(first, last string, gender PlayerGender) *Player {
 	p.Gender = gender
 
 	p.Pref = make(map[Position]int)
+	p.CptPref = make(map[Position]int)
 
 	//Initialize the preferences table
 	for _, pos := range fieldPosList {
 		p.Pref[pos] = 0.0
+		p.CptPref[pos] = 0.0
 	}
 
 	p.PrefNorm = make(map[Position]float64)
@@ -177,7 +179,11 @@ func (player Player) String() string {
 
 	str.WriteString(fmt.Sprintf("%s %s, %s, %s, %s\n", player.FirstName, player.LastName, player.Gender, player.Email, player.Phone))
 	for pref, val := range player.Pref {
-		str.WriteString(fmt.Sprintf("%s %d, ", pref, val))
+		str.WriteString(fmt.Sprintf("%s %d (%v)\n", pref, val, player.PrefNorm[pref]))
+	}
+	str.WriteString("\n")
+	for pref, val := range player.CptPref {
+		str.WriteString(fmt.Sprintf("%s %d (%v)\n", pref, val, player.CptPrefNorm[pref]))
 	}
 	str.WriteString("\n")
 
