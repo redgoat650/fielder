@@ -199,15 +199,15 @@ func (pg PositionGroup) String() string {
 	case LiterallyAnything:
 		return "Literally Anything"
 	case TierOnePositions: // RF, LC
-		return "Tier One Positions"
+		return "TierOnePositions"
 	case TierTwoPositions: // 2B, RS
-		return "Tier Two Positions"
+		return "TierTwoPositions"
 	case TierThreePositions: // LS, RC, LF
-		return "Tier Three Positions"
+		return "TierThreePositions"
 	case TierFourPositions: // 1B, 3B
-		return "Tier Four Positions"
+		return "TierFourPositions"
 	case TierFivePositions: // Pitcher, Catcher
-		return "Tier Five Positions"
+		return "TierFivePositions"
 	default:
 		return "Invalid Position group"
 	}
