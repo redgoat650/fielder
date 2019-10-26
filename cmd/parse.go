@@ -48,7 +48,7 @@ format legacy spreadsheet in CSV format.`,
 			}
 			fmt.Println(game)
 
-			savePath := fmt.Sprintf("testdata/gen/game_%v", time.Now().Unix())
+			savePath := fmt.Sprintf("testdata/gen/game_%v.gam", time.Now().Unix())
 			err = storage.SaveGob(savePath, game)
 			if err != nil {
 				return err
