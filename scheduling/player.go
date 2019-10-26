@@ -2,12 +2,16 @@ package fielder
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 )
+
+type PlayerID uint64
 
 //Player is a struct for storing the information and scheduling
 //information for each player
 type Player struct {
+	ID        PlayerID
 	FirstName string
 	LastName  string
 	Email     string
@@ -21,15 +25,16 @@ type Player struct {
 	Seniority   float64
 	Skill       float64
 
-	Roles         map[*Game][]Position
+	// Roles         map[*Game][]Position
 	scoreByInning []float64
 
-	Attendance map[*Game]bool
+	// Attendance map[*Game]bool
 }
 
 //NewPlayer initializes a new Player and returns its pointer
 func NewPlayer(first, last string, gender PlayerGender) *Player {
 	p := new(Player)
+	p.ID = PlayerID(rand.Uint64())
 	p.FirstName = first
 	p.LastName = last
 	p.Gender = gender
@@ -45,9 +50,9 @@ func NewPlayer(first, last string, gender PlayerGender) *Player {
 
 	p.PrefNorm = make(map[Position]float64)
 	p.CptPrefNorm = make(map[Position]float64)
-	p.Roles = make(map[*Game][]Position)
+	// p.Roles = make(map[*Game][]Position)
 	p.scoreByInning = make([]float64, 0)
-	p.Attendance = make(map[*Game]bool)
+	// p.Attendance = make(map[*Game]bool)
 
 	return p
 }
@@ -132,9 +137,9 @@ func (player *Player) IsFemale() bool {
 
 //IsAttending is a helper method for Player that returns whether
 //the player in question is planning to attend the provided Game
-func (player *Player) IsAttending(game *Game) bool {
-	return player.Attendance[game]
-}
+// func (player *Player) IsAttending(game *Game) bool {
+// 	return player.Attendance[game]
+// }
 
 //PlayerGender is a type that describes the gender of a player
 type PlayerGender int

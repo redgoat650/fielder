@@ -1,17 +1,19 @@
 package fielder
 
+import "fmt"
+
 //Inning is a struct for tracking the players assigned to each
 //field position for this game inning.
 type Inning struct {
-	FieldPositions map[Position]*Player
+	FieldPositions map[Position]PlayerID
 
-	mtx *ScoringMatrix
+	// mtx *ScoringMatrix
 }
 
 //NewInning will initialize an Inning and return its pointer
 func NewInning() *Inning {
 	inning := new(Inning)
-	inning.FieldPositions = make(map[Position]*Player)
+	inning.FieldPositions = make(map[Position]PlayerID)
 	// inning.InitializeFieldPositions()
 	return inning
 }
@@ -28,6 +30,16 @@ var fieldPosList = []Position{
 	LCenter,
 	RCenter,
 	RField,
+}
+
+func (inning *Inning) FindPlayerPosition(pl PlayerID) Position {
+	pos := Bench
+	for pos, checkPlayer := range inning.FieldPositions {
+		if checkPlayer == pl {
+			return pos
+		}
+	}
+	return pos
 }
 
 //InitializeFieldPositions will initialize the map of valid field positions
@@ -75,14 +87,17 @@ func (inning *Inning) CountPlayersOnField() (filled, unfilled int) {
 
 //CountGenders is an Inning method that returns the number of
 //male and female players assigned to positions in this inning.
-func (inning *Inning) CountGenders() (female, male int) {
-	for _, position := range inning.FieldPositions {
-		if position != nil {
-			if position.IsFemale() {
-				female++
-			} else {
-				male++
-			}
+func (inning *Inning) CountGenders(roster *Roster) (female, male int) {
+	for _, playerID := range inning.FieldPositions {
+		player, ok := roster.Players[playerID]
+		if !ok {
+			fmt.Println("Player ID", playerID, roster)
+			panic("Player ID not found in roster")
+		}
+		if player.IsFemale() {
+			female++
+		} else {
+			male++
 		}
 	}
 	return

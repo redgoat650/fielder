@@ -1,8 +1,11 @@
 package storage
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -67,4 +70,37 @@ func WriteToFile(r io.Reader, path string) error {
 	}
 
 	return nil
+}
+
+func SaveGob(path string, thing interface{}) error {
+	dir, _ := filepath.Split(path)
+	err := os.MkdirAll(dir, 0777)
+	if err != nil {
+		return err
+	}
+
+	buf := new(bytes.Buffer)
+
+	encErr := gob.NewEncoder(buf).Encode(thing)
+	if encErr != nil {
+		return encErr
+	}
+
+	err = ioutil.WriteFile(path, buf.Bytes(), 0777)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func LoadGob(path string) (*gob.Decoder, error) {
+
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	buf := bytes.NewBuffer(b)
+
+	return gob.NewDecoder(buf), nil
 }

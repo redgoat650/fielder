@@ -8,29 +8,29 @@ import (
 //Roster is a list of Players that will be participating
 //in a game
 type Roster struct {
-	Players map[*Player]struct{}
+	Players map[PlayerID]*Player
 }
 
 //NewRoster initializes a Roster and returns its pointer
 func NewRoster() *Roster {
 	roster := new(Roster)
-	roster.Players = make(map[*Player]struct{}, 0)
+	roster.Players = make(map[PlayerID]*Player, 0)
 	return roster
 }
 
 //AddPlayer is a roster method that will add a Player to the Roster
 func (roster *Roster) AddPlayer(player *Player) {
-	roster.Players[player] = struct{}{}
+	roster.Players[player.ID] = player
 }
 
 //DropPlayer is a roster method that will drop a Player from the Roster
 func (roster *Roster) DropPlayer(player *Player) {
-	delete(roster.Players, player)
+	delete(roster.Players, player.ID)
 }
 
 // Reset rests a roster
 func (roster *Roster) Reset() {
-	for player := range roster.Players {
+	for _, player := range roster.Players {
 		roster.DropPlayer(player)
 	}
 }
@@ -45,7 +45,7 @@ func (roster *Roster) NumPlayers() int {
 //females and males in the Roster
 func (roster *Roster) CountGenders() (female, male int) {
 
-	for playerInfo := range roster.Players {
+	for _, playerInfo := range roster.Players {
 		if playerInfo.IsFemale() {
 			female++
 		}

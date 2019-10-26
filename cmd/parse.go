@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/redgoat650/fielder/parsing/buzzedsheets"
+	"github.com/redgoat650/fielder/storage"
 	"github.com/spf13/cobra"
 )
 
@@ -45,6 +47,28 @@ format legacy spreadsheet in CSV format.`,
 				return err
 			}
 			fmt.Println(game)
+
+			savePath := fmt.Sprintf("testdata/gen/game_%v", time.Now().Unix())
+			err = storage.SaveGob(savePath, game)
+			if err != nil {
+				return err
+			}
+
+			// newGame := &fielder.Game{}
+			// dec, err := storage.LoadGob(savePath)
+			// if err != nil {
+			// 	return err
+			// }
+			// err = dec.Decode(newGame)
+			// if err != nil {
+			// 	return err
+			// }
+
+			// if game.String() != newGame.String() {
+			// 	fmt.Println(newGame)
+			// 	panic("what")
+			// }
+
 			return nil
 
 		},

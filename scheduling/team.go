@@ -96,11 +96,11 @@ func LoadTeamFromFile(filename string) (team *Team, err error) {
 
 	err = gob.NewDecoder(file).Decode(loadTeam)
 
-	for _, season := range loadTeam.SeasonList {
-		for i, v := range season.Games {
-			season.Games[i].Self = v
-		}
-	}
+	// for _, season := range loadTeam.SeasonList {
+	// 	for i, v := range season.Games {
+	// 		season.Games[i].Self = v
+	// 	}
+	// }
 
 	return loadTeam, err
 }

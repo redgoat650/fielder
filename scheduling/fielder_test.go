@@ -69,11 +69,11 @@ func TestSeasonSchedule(t *testing.T) {
 	for plName, plGender := range testPlayers {
 		pl := NewPlayer(plName, "blub", plGender)
 
-		for _, gamePtr := range season.Games {
-			if plName != "Cody" {
-				pl.Attendance[gamePtr] = true
-			}
-		}
+		// for _, gamePtr := range season.Games {
+		// 	if plName != "Cody" {
+		// 		pl.Attendance[gamePtr] = true
+		// 	}
+		// }
 
 		team.AddPlayer(pl)
 	}

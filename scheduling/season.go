@@ -57,11 +57,11 @@ func (season *Season) ScheduleAllGames() error {
 		gameRoster.Reset()
 
 		//Add players to the roster if they're marked as attending
-		for player := range season.Team.Active.Players {
-			if player.IsAttending(game) {
-				gameRoster.AddPlayer(player)
-			}
-		}
+		// for player := range season.Team.Active.Players {
+		// 	if player.IsAttending(game) {
+		// 		gameRoster.AddPlayer(player)
+		// 	}
+		// }
 
 		// Schedule this game
 		// game.SetRoster(gameRoster)
@@ -99,9 +99,9 @@ func (season Season) String() string {
 // SaveToFile saves a Season to the given file name
 func (season *Season) SaveToFile(filename string) error {
 
-	for i := range season.Games {
-		season.Games[i].Self = nil
-	}
+	// for i := range season.Games {
+	// 	season.Games[i].Self = nil
+	// }
 
 	buf := new(bytes.Buffer)
 
@@ -145,9 +145,9 @@ func LoadSeasonFromFile(filename string) (season *Season, err error) {
 
 	err = gob.NewDecoder(file).Decode(loadSeason)
 
-	for i, v := range loadSeason.Games {
-		loadSeason.Games[i].Self = v
-	}
+	// for i, v := range loadSeason.Games {
+	// 	loadSeason.Games[i].Self = v
+	// }
 
 	return loadSeason, err
 }

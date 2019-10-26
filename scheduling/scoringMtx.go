@@ -10,17 +10,17 @@ type ScoringMatrix struct {
 func NewScoringMatrix(roster *Roster) *ScoringMatrix {
 	mtx := new(ScoringMatrix)
 
-	mtx.PlayerInfoMap = make(map[*Player](map[Position]float64))
-	for player := range roster.Players {
-		mtx.PlayerInfoMap[player] = make(map[Position]float64)
+	// mtx.PlayerInfoMap = make(map[*Player](map[Position]float64))
+	// for player := range roster.Players {
+	// 	mtx.PlayerInfoMap[player] = make(map[Position]float64)
 
-		//Initialize the scores to zero
-		for posIdx := 0; posIdx < NumFieldPositions; posIdx++ {
-			pos := posIdx2Position(posIdx)
-			mtx.PlayerInfoMap[player][pos] = 0.0
-		}
+	// 	//Initialize the scores to zero
+	// 	for posIdx := 0; posIdx < NumFieldPositions; posIdx++ {
+	// 		pos := posIdx2Position(posIdx)
+	// 		mtx.PlayerInfoMap[player][pos] = 0.0
+	// 	}
 
-	}
+	// }
 
 	return mtx
 
