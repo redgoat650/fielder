@@ -47,7 +47,7 @@ func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, captCfgCSV, gameDate 
 	}
 
 	numNames := len(nameList)
-	genderList, err := getGenderList(schedule, numNames)
+	genderList, err := getGenderList(schedule)
 	if err != nil {
 		return nil, err
 	}
@@ -187,11 +187,29 @@ func findColumnIdx(headerRow []string, colTitle string) (int, error) {
 }
 
 func getNameList(schedule [][]string) ([]string, error) {
-	return getColumnList(schedule, nameHeaderStr, 0, schedHeaderOffset)
+	genderList, err := getGenderList(schedule)
+	if err != nil {
+		return nil, err
+	}
+	nameList, err := getColumnList(schedule, nameHeaderStr, len(genderList), schedHeaderOffset)
+	if err != nil {
+		return nil, err
+	}
+	nameList = nameList[:len(genderList)]
+	return nameList, nil
 }
 
-func getGenderList(schedule [][]string, numNames int) ([]string, error) {
-	return getColumnList(schedule, genderHeaderStr, numNames, schedHeaderOffset)
+func getGenderList(schedule [][]string) ([]string, error) {
+	genderList, err := getColumnList(schedule, genderHeaderStr, 0, schedHeaderOffset)
+	if err != nil {
+		return nil, err
+	}
+	for i, gender := range genderList {
+		if _, err := fielder.ParseGenderString(gender); err != nil {
+			return genderList[:i], nil
+		}
+	}
+	return genderList, nil
 }
 
 func getEmailList(schedule [][]string, numNames int) ([]string, error) {
