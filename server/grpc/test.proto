@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package testgrpc;
+
+//protoc -I ./ test.proto --go_out=plugins=grpc:.
+//protoc -I=. test.proto --js_out=import_style=commonjs:. --grpc-web_out=import_style=commonjs,mode=grpcwebtext:.
+//protoc -I=. test.proto --js_out=import_style=commonjs:../../fielder-ui/src/grpc/pb --grpc-web_out=import_style=commonjs,mode=grpcwebtext:../../fielder-ui/src/grpc/pb
+
+service TestService {
+    rpc TestRPC(Ping) returns (Pong) {}
+}
+
+message Ping {
+    string message = 1;
+}
+
+message Pong {
+    string message = 1;
+}

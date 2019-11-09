@@ -5,6 +5,7 @@ import SignIn from "./materialEx/page-layout-examples/sign-in/SignIn";
 import SignUp from "./materialEx/page-layout-examples/sign-up/SignUp";
 import { Provider as ReduxProvider } from "react-redux";
 import configureStore from "./modules/store";
+import SelectTeam from "./components/SelectTeam";
 
 const reduxStore = configureStore(window.REDUX_INITIAL_DATA);
 
@@ -12,6 +13,8 @@ function App() {
     return (
         <ReduxProvider store={reduxStore}>
             <div className="App">
+                <SelectTeam></SelectTeam>
+
                 {/* <header className="App-header">
                     <img src={logo} className="App-logo" alt="logo" />
                     <p>
@@ -27,9 +30,9 @@ function App() {
                     </a>
                 </header> */}
             </div>
-            <Dashboard />
+            {/* <Dashboard />
             <SignIn />
-            <SignUp />
+            <SignUp /> */}
         </ReduxProvider>
     );
 }
