@@ -92,10 +92,14 @@ func writeGlobalTeam() error {
 }
 
 func getFullTeamFilePath(teamName string) string {
-	teamsDir := filepath.Join(dataDirParent, teamsDirName)
+	teamsDir := getTeamsDir()
 	filename := filepath.Join(teamsDir, teamName+".json")
 
 	return filename
+}
+
+func getTeamsDir() string {
+	return filepath.Join(dataDirParent, teamsDirName)
 }
 
 func loadTeam() error {

@@ -17,8 +17,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // listCmd represents the list command
@@ -26,16 +29,52 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: teamListRunFunc,
+and usage of using your command. For example:`,
+	RunE: teamListRunFunc,
 }
 
-func teamListRunFunc(cmd *cobra.Command, args []string) {
+func teamListRunFunc(cmd *cobra.Command, args []string) error {
 	fmt.Println("list called")
+
+	return renderTeamNamesFromDir()
+}
+
+func renderTeamNamesFromDir() error {
+	names, err := readTeamNamesFromDir()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Available team names:")
+	for _, name := range names {
+		fmt.Println("-", name)
+	}
+
+	return nil
+}
+
+func readTeamNamesFromDir() ([]string, error) {
+	teamsDir := getTeamsDir()
+
+	dirEntries, err := os.ReadDir(teamsDir)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := []string{}
+	for _, entry := range dirEntries {
+		fileName := entry.Name()
+		teamName := strings.TrimSuffix(fileName, ".json")
+
+		var selectedTeamMarker = ""
+		if teamName == viper.Get(selectedTeamConfigKey) {
+			selectedTeamMarker = " *"
+		}
+
+		ret = append(ret, teamName+selectedTeamMarker)
+	}
+
+	return ret, nil
 }
 
 func init() {

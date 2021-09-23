@@ -44,7 +44,12 @@ func switchRunFunc(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return viperSetTeam(name)
+	err = viperSetTeam(name)
+	if err != nil {
+		return err
+	}
+
+	return renderTeamNamesFromDir()
 }
 
 func init() {
