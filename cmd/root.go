@@ -59,12 +59,13 @@ func skipLoadTeam(cmd *cobra.Command) bool {
 }
 
 func rootPersistentPreRunFunc(cmd *cobra.Command, args []string) error {
+	fmt.Println("fielder pre run")
+
 	if skipLoadTeam(cmd) {
-		// Don't need to load current team
 		return nil
 	}
 
-	return maybeLoadTeam()
+	return loadTeam()
 }
 
 func rootPersistentPostRunFunc(cmd *cobra.Command, args []string) error {
@@ -85,13 +86,20 @@ func writeGlobalTeam() error {
 	teamsDir := filepath.Join(dataDirParent, teamsDirName)
 	_ = os.MkdirAll(teamsDir, 0755)
 
-	filename := filepath.Join(teamsDir, gTeam.TeamName+".json")
+	filename := getFullTeamFilePath(gTeam.TeamName)
 
 	return os.WriteFile(filename, b, 0755)
 }
 
-func maybeLoadTeam() error {
-	fmt.Println("fielder pre run")
+func getFullTeamFilePath(teamName string) string {
+	teamsDir := filepath.Join(dataDirParent, teamsDirName)
+	filename := filepath.Join(teamsDir, teamName+".json")
+
+	return filename
+}
+
+func loadTeam() error {
+	fmt.Println("Loading team")
 
 	if !viper.IsSet(selectedTeamConfigKey) {
 		return errors.New("no team selected")
@@ -103,8 +111,7 @@ func maybeLoadTeam() error {
 		return errors.New("team name is not string format")
 	}
 
-	teamsDir := filepath.Join(dataDirParent, teamsDirName)
-	filename := filepath.Join(teamsDir, teamNameStr+".json")
+	filename := getFullTeamFilePath(teamNameStr)
 
 	b, err := os.ReadFile(filename)
 	if err != nil {

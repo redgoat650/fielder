@@ -16,7 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,17 +35,18 @@ var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+and usage of using your command. For example:`,
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	RunE: teamCreateRunFunc,
 }
 
 func teamCreateRunFunc(cmd *cobra.Command, args []string) error {
 	fmt.Println("create called")
 	name := cmd.Flag(teamNameFlagName).Value.String()
+
+	if teamExists(name) {
+		return errors.New("team already exists")
+	}
 
 	return teamCreate(name)
 }
@@ -54,6 +57,13 @@ func teamCreate(name string) error {
 	viper.Set(selectedTeamConfigKey, name)
 
 	return viperUpdateOrCreate()
+}
+
+func teamExists(teamName string) bool {
+	filename := getFullTeamFilePath(teamName)
+
+	_, err := os.Stat(filename)
+	return err == nil
 }
 
 func viperUpdateOrCreate() error {
