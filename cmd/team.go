@@ -19,14 +19,11 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
-	fielder "github.com/redgoat650/fielder/scheduling"
 )
 
-// createCmd represents the create command
-var createCmd = &cobra.Command{
-	Use:   "create",
+// teamCmd represents the team command
+var teamCmd = &cobra.Command{
+	Use:   "team",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -34,36 +31,28 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("create called")
-		name := cmd.Flag("name").Value.String()
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		fmt.Println("team persistent prerun")
 
-		gTeam = fielder.NewTeam(name)
+		// name := cmd.Flag("name")
 
-		viper.Set("selectedTeam", name)
-
-		err := viper.WriteConfig()
-		if err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-				return viper.SafeWriteConfig()
-			}
-			return err
-		}
-		return nil
+		fmt.Println("---------------------")
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("team called")
 	},
 }
 
 func init() {
-	teamCmd.AddCommand(createCmd)
+	rootCmd.AddCommand(teamCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// createCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// teamCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	createCmd.Flags().StringP("name", "n", "", "Team name")
-	createCmd.MarkFlagRequired("name")
+	// teamCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

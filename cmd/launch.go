@@ -1,15 +1,15 @@
 package cmd
 
-import (
-	"github.com/spf13/cobra"
-)
+// import (
+// 	"github.com/spf13/cobra"
+// )
 
-var launchCmd = &cobra.Command{
-	Use:   "launch",
-	Short: "Launch a fielder server",
-	Long:  `Launch a fielder server`,
-}
+// var launchCmd = &cobra.Command{
+// 	Use:   "launch",
+// 	Short: "Launch a fielder server",
+// 	Long:  `Launch a fielder server`,
+// }
 
-func init() {
-	rootCmd.AddCommand(launchCmd)
-}
+// func init() {
+// 	rootCmd.AddCommand(launchCmd)
+// }

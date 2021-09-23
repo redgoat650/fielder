@@ -16,15 +16,26 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
-
 	"github.com/spf13/viper"
+
+	fielder "github.com/redgoat650/fielder/scheduling"
 )
 
-var cfgFile string
+var (
+	cfgFile       string
+	gTeam         *fielder.Team
+	dataDirParent string
+)
+
+const (
+	teamsDirName = "teams"
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -35,6 +46,24 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("fielder post run")
+		if gTeam != nil {
+			b, err := json.Marshal(gTeam)
+			if err != nil {
+				return err
+			}
+
+			teamsDir := filepath.Join(dataDirParent, teamsDirName)
+			_ = os.MkdirAll(teamsDir, 0755)
+
+			filename := filepath.Join(teamsDir, gTeam.TeamName+".json")
+
+			return os.WriteFile(filename, b, 0755)
+		}
+
+		return nil
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -54,7 +83,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -62,6 +91,7 @@ func initConfig() {
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
+		dataDirParent = filepath.Dir(cfgFile)
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
@@ -71,6 +101,8 @@ func initConfig() {
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".fielder")
+
+		dataDirParent = home
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
