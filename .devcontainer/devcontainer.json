@@ -17,8 +17,8 @@
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"go.useGoProxyToCheckForToolUpdates": false,
 		"go.useLanguageServer": true,
-		"go.gopath": "/go",
-		"go.goroot": "/usr/local/go",
+		// "go.gopath": "/go",
+		// "go.goroot": "/usr/local/go",
 		"go.toolsGopath": "/go/bin"
 	},
 	
