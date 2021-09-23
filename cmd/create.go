@@ -24,6 +24,10 @@ import (
 	fielder "github.com/redgoat650/fielder/scheduling"
 )
 
+var (
+	teamNameFlagName = "name"
+)
+
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
@@ -34,12 +38,14 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("create called")
-		name := cmd.Flag("name").Value.String()
+	RunE: teamCreateRunFunc,
+}
 
-		return teamCreate(name)
-	},
+func teamCreateRunFunc(cmd *cobra.Command, args []string) error {
+	fmt.Println("create called")
+	name := cmd.Flag(teamNameFlagName).Value.String()
+
+	return teamCreate(name)
 }
 
 func teamCreate(name string) error {
@@ -47,6 +53,10 @@ func teamCreate(name string) error {
 
 	viper.Set(selectedTeamConfigKey, name)
 
+	return viperUpdateOrCreate()
+}
+
+func viperUpdateOrCreate() error {
 	err := viper.WriteConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -68,6 +78,6 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	createCmd.Flags().StringP("name", "n", "", "Team name")
-	createCmd.MarkFlagRequired("name")
+	createCmd.Flags().StringP(teamNameFlagName, "n", "", "Team name")
+	createCmd.MarkFlagRequired(teamNameFlagName)
 }

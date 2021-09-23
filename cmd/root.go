@@ -45,29 +45,12 @@ var rootCmd = &cobra.Command{
 	Long: `A scheduler that distributes players into positions on the field
 	based on preference, seniority, and equal playing time.`,
 
-	PersistentPreRunE: persistentPreRunFunc,
+	PersistentPreRunE: rootPersistentPreRunFunc,
 
-	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("fielder post run")
-		if gTeam != nil {
-			b, err := json.Marshal(gTeam)
-			if err != nil {
-				return err
-			}
-
-			teamsDir := filepath.Join(dataDirParent, teamsDirName)
-			_ = os.MkdirAll(teamsDir, 0755)
-
-			filename := filepath.Join(teamsDir, gTeam.TeamName+".json")
-
-			return os.WriteFile(filename, b, 0755)
-		}
-
-		return nil
-	},
+	PersistentPostRunE: rootPersistentPostRunFunc,
 }
 
-func willSwitchTeams(cmd *cobra.Command) bool {
+func skipLoadTeam(cmd *cobra.Command) bool {
 	switch cmd.Name() {
 	case "create", "switch", "list":
 		return cmd.Parent().Name() == "team"
@@ -75,12 +58,36 @@ func willSwitchTeams(cmd *cobra.Command) bool {
 	return false
 }
 
-func persistentPreRunFunc(cmd *cobra.Command, args []string) error {
-	if willSwitchTeams(cmd) {
+func rootPersistentPreRunFunc(cmd *cobra.Command, args []string) error {
+	if skipLoadTeam(cmd) {
+		// Don't need to load current team
 		return nil
 	}
 
 	return maybeLoadTeam()
+}
+
+func rootPersistentPostRunFunc(cmd *cobra.Command, args []string) error {
+	fmt.Println("fielder post run")
+	if gTeam != nil {
+		return writeGlobalTeam()
+	}
+
+	return nil
+}
+
+func writeGlobalTeam() error {
+	b, err := json.Marshal(gTeam)
+	if err != nil {
+		return err
+	}
+
+	teamsDir := filepath.Join(dataDirParent, teamsDirName)
+	_ = os.MkdirAll(teamsDir, 0755)
+
+	filename := filepath.Join(teamsDir, gTeam.TeamName+".json")
+
+	return os.WriteFile(filename, b, 0755)
 }
 
 func maybeLoadTeam() error {
