@@ -21,6 +21,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	selectedTeamConfigKey = "selectedTeam"
+)
+
 // teamCmd represents the team command
 var teamCmd = &cobra.Command{
 	Use:   "team",
@@ -31,13 +35,7 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		fmt.Println("team persistent prerun")
 
-		// name := cmd.Flag("name")
-
-		fmt.Println("---------------------")
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("team called")
 	},

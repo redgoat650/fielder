@@ -38,19 +38,23 @@ to quickly create a Cobra application.`,
 		fmt.Println("create called")
 		name := cmd.Flag("name").Value.String()
 
-		gTeam = fielder.NewTeam(name)
-
-		viper.Set("selectedTeam", name)
-
-		err := viper.WriteConfig()
-		if err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-				return viper.SafeWriteConfig()
-			}
-			return err
-		}
-		return nil
+		return teamCreate(name)
 	},
+}
+
+func teamCreate(name string) error {
+	gTeam = fielder.NewTeam(name)
+
+	viper.Set(selectedTeamConfigKey, name)
+
+	err := viper.WriteConfig()
+	if err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			return viper.SafeWriteConfig()
+		}
+		return err
+	}
+	return nil
 }
 
 func init() {

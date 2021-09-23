@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -43,9 +44,9 @@ var rootCmd = &cobra.Command{
 	Short: "Schedule positions for a team in a field",
 	Long: `A scheduler that distributes players into positions on the field
 	based on preference, seniority, and equal playing time.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+
+	PersistentPreRunE: persistentPreRunFunc,
+
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("fielder post run")
 		if gTeam != nil {
@@ -64,6 +65,52 @@ var rootCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func willSwitchTeams(cmd *cobra.Command) bool {
+	switch cmd.Name() {
+	case "create", "switch", "list":
+		return cmd.Parent().Name() == "team"
+	}
+	return false
+}
+
+func persistentPreRunFunc(cmd *cobra.Command, args []string) error {
+	if willSwitchTeams(cmd) {
+		return nil
+	}
+
+	return maybeLoadTeam()
+}
+
+func maybeLoadTeam() error {
+	fmt.Println("fielder pre run")
+
+	if !viper.IsSet(selectedTeamConfigKey) {
+		return errors.New("no team selected")
+	}
+	teamName := viper.Get(selectedTeamConfigKey)
+
+	teamNameStr, ok := teamName.(string)
+	if !ok {
+		return errors.New("team name is not string format")
+	}
+
+	teamsDir := filepath.Join(dataDirParent, teamsDirName)
+	filename := filepath.Join(teamsDir, teamNameStr+".json")
+
+	b, err := os.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(b, &gTeam)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Using existing team", gTeam.TeamName)
+	return nil
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
