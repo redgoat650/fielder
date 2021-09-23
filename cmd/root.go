@@ -101,17 +101,16 @@ func getFullTeamFilePath(teamName string) string {
 func loadTeam() error {
 	fmt.Println("Loading team")
 
-	if !viper.IsSet(selectedTeamConfigKey) {
-		return errors.New("no team selected")
-	}
-	teamName := viper.Get(selectedTeamConfigKey)
-
-	teamNameStr, ok := teamName.(string)
-	if !ok {
-		return errors.New("team name is not string format")
+	teamName, err := getTeamNameFromViper()
+	if err != nil {
+		return err
 	}
 
-	filename := getFullTeamFilePath(teamNameStr)
+	return loadTeamByName(teamName)
+}
+
+func loadTeamByName(teamName string) error {
+	filename := getFullTeamFilePath(teamName)
 
 	b, err := os.ReadFile(filename)
 	if err != nil {
@@ -125,6 +124,20 @@ func loadTeam() error {
 
 	fmt.Println("Using existing team", gTeam.TeamName)
 	return nil
+}
+
+func getTeamNameFromViper() (string, error) {
+	if !viper.IsSet(selectedTeamConfigKey) {
+		return "", errors.New("no team selected")
+	}
+	teamName := viper.Get(selectedTeamConfigKey)
+
+	teamNameStr, ok := teamName.(string)
+	if !ok {
+		return "", errors.New("team name is not string format")
+	}
+
+	return teamNameStr, nil
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
