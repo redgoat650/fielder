@@ -54,7 +54,11 @@ func teamCreateRunFunc(cmd *cobra.Command, args []string) error {
 func teamCreate(name string) error {
 	gTeam = fielder.NewTeam(name)
 
-	viper.Set(selectedTeamConfigKey, name)
+	return viperSetTeam(name)
+}
+
+func viperSetTeam(teamName string) error {
+	viper.Set(selectedTeamConfigKey, teamName)
 
 	return viperUpdateOrCreate()
 }
