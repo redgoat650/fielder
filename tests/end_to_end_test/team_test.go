@@ -88,3 +88,57 @@ func TestNewTeamDelete(t *testing.T) {
 		t.Fatal("Team should no longer be in the team list")
 	}
 }
+
+func TestNewTeamSwitch(t *testing.T) {
+	r := testenv.NewExeRunner(t)
+
+	out, err := r.Run(t, false, "team", "create", "test-team-1")
+
+	if err != nil {
+		t.Fatal("Unexpected error", err)
+	}
+
+	if !strings.Contains(out, "Creating team") {
+		t.Fatal("Did not find expected output for new team")
+	}
+
+	// Check first team was automatically selected
+	out, _ = r.Run(t, false, "team", "list")
+
+	if !strings.Contains(out, "* test-team-1") {
+		t.Fatal("Team was expected to appear as selected when listing teams")
+	}
+
+	out, err = r.Run(t, false, "team", "create", "test-team-2")
+
+	if err != nil {
+		t.Fatal("Unexpected error", err)
+	}
+
+	if !strings.Contains(out, "Creating team") {
+		t.Fatal("Did not find expected output for new team")
+	}
+
+	// Check second team was automatically selected on creation and first team is still listed
+	out, _ = r.Run(t, false, "team", "list")
+
+	if !strings.Contains(out, "* test-team-2") {
+		t.Fatal("Team was expected to appear as selected when listing teams")
+	}
+
+	if !strings.Contains(out, "- test-team-1") {
+		t.Fatal("Team was expected to appear as selected when listing teams")
+	}
+
+	// Check able to switch back to test-team-1
+	out, _ = r.Run(t, false, "team", "switch", "test-team-1")
+
+	if !strings.Contains(out, "* test-team-1") {
+		t.Fatal("Team was expected to appear as selected when listing teams")
+	}
+
+	if !strings.Contains(out, "- test-team-2") {
+		t.Fatal("Team was expected to appear as selected when listing teams")
+	}
+
+}
