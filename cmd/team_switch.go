@@ -40,14 +40,7 @@ func switchRunFunc(cmd *cobra.Command, args []string) error {
 	fmt.Println("switch called")
 
 	if clearTeam {
-		if len(args) != 0 {
-			return errors.New("expecting zero arguments")
-		}
-
-		fmt.Println("Clearing selected team")
-		viper.Set(selectedTeamConfigKey, "")
-
-		return viperUpdateOrCreate()
+		return clearSelectedTeam(args)
 	}
 
 	if len(args) != 1 {
@@ -72,6 +65,24 @@ func switchRunFunc(cmd *cobra.Command, args []string) error {
 	}
 
 	return renderTeamNamesFromDir()
+}
+
+func clearSelectedTeam(args []string) error {
+	if len(args) != 0 {
+		return errors.New("expecting zero arguments")
+	}
+
+	fmt.Println("Clearing selected team")
+	viper.Set(selectedTeamConfigKey, "")
+
+	err := viperUpdateOrCreate()
+	if err != nil {
+		return err
+	}
+
+	renderTeamNamesFromDir()
+
+	return nil
 }
 
 func init() {
