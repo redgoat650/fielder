@@ -26,8 +26,8 @@ import (
 	fielder "github.com/redgoat650/fielder/scheduling"
 )
 
-// createCmd represents the create command
-var createCmd = &cobra.Command{
+// teamCreateCmd represents the create command
+var teamCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -84,5 +84,5 @@ func viperUpdateOrCreate() error {
 }
 
 func init() {
-	teamCmd.AddCommand(createCmd)
+	teamCmd.AddCommand(teamCreateCmd)
 }

@@ -28,8 +28,8 @@ var (
 	teamDeleteConfirm bool
 )
 
-// deleteCmd represents the delete command
-var deleteCmd = &cobra.Command{
+// teamDeleteCmd represents the delete command
+var teamDeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -78,7 +78,7 @@ func deleteTeam(teamName string) error {
 }
 
 func init() {
-	teamCmd.AddCommand(deleteCmd)
+	teamCmd.AddCommand(teamDeleteCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -88,5 +88,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	deleteCmd.Flags().BoolVarP(&teamDeleteConfirm, "delete", "D", false, "Confirm deletion")
+	teamDeleteCmd.Flags().BoolVarP(&teamDeleteConfirm, "delete", "D", false, "Confirm deletion")
 }

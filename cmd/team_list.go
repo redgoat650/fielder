@@ -24,8 +24,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
+// teamListCmd represents the list command for a Team
+var teamListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List teams",
 	Long:  `List all available teams`,
@@ -78,5 +78,5 @@ func readTeamNamesFromDir() ([]string, error) {
 }
 
 func init() {
-	teamCmd.AddCommand(listCmd)
+	teamCmd.AddCommand(teamListCmd)
 }

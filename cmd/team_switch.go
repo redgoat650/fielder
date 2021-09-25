@@ -22,8 +22,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// switchCmd represents the switch command
-var switchCmd = &cobra.Command{
+// teamSwitchCmd represents the switch command
+var teamSwitchCmd = &cobra.Command{
 	Use:   "switch",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -59,5 +59,5 @@ func switchRunFunc(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	teamCmd.AddCommand(switchCmd)
+	teamCmd.AddCommand(teamSwitchCmd)
 }
