@@ -1,79 +1,46 @@
+/*
+Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package cmd
 
-// import (
-// 	"fmt"
-// 	"math"
+import (
+	"errors"
+	"fmt"
 
-// 	"github.com/spf13/cobra"
-// )
+	"github.com/spf13/cobra"
+)
 
-// var addCmd = &cobra.Command{
-// 	Use:   "add",
-// 	Short: "Add an item to data",
-// 	Long:  `A common action to add something to the fielder data`,
-// 	PreRunE: func(cmd *cobra.Command, args []string) error {
-// 		if gTeam == nil {
-// 			return fmt.Errorf("Team couldn't be loaded, so can't add any properties")
-// 		}
-// 		return nil
-// 	},
-// }
+// seasonAddCmd represents the add command
+var seasonAddCmd = &cobra.Command{
+	Use:   "add",
+	Short: "Add a season.",
+	Long:  `Add a season for the currently selected team.`,
+	RunE:  seasonAddRunFunc,
+}
 
-// func init() {
+func seasonAddRunFunc(cmd *cobra.Command, args []string) error {
+	fmt.Println("season add called")
 
-// 	var (
-// 		addGameToSeason int
-// 		numInnings      int
-// 		startTimeDesc   string
-// 		opponentTeam    string
-// 		gameDetails     string
-// 	)
+	if gTeam != nil {
+		fmt.Println("Select a team with 'fielder team select <name>' or create a new one with 'fielder team create <name>'")
+		return errors.New("no team selected")
+	}
 
-// 	var addGameCmd = &cobra.Command{
-// 		Use:   "game",
-// 		Short: "Add a game to a season",
-// 		Long:  `Add a game to a given season`,
-// 		RunE: func(cmd *cobra.Command, args []string) error {
+	return nil
+}
 
-// 			if len(gTeam.SeasonList) == 0 {
-// 				return fmt.Errorf("No seasons have been added for this team: fielder add season --help")
-// 			}
-
-// 			season := gTeam.SeasonList[len(gTeam.SeasonList)-1-int(math.Abs(float64(addGameToSeason)))]
-
-// 			season.AddGame(numInnings, startTimeDesc, opponentTeam, gameDetails)
-
-// 			return nil
-
-// 		},
-// 	}
-
-// 	var addSeasonCmd = &cobra.Command{
-// 		Use:   "season",
-// 		Short: "Add a season for this team",
-// 		Long: `Add a season to a team's career. Provide "season" parameter
-// 		as the number of seasons from the most recent to add this game. Defaults
-// 		to zero, which adds the game to the most recent season. Setting it to 1
-// 		will add it to the previous season`,
-// 		RunE: func(cmd *cobra.Command, args []string) error {
-
-// 			season := gTeam.SeasonList[len(gTeam.SeasonList)-1-int(math.Abs(float64(addGameToSeason)))]
-
-// 			season.AddGame(numInnings, startTimeDesc, opponentTeam, gameDetails)
-
-// 			return nil
-
-// 		},
-// 	}
-
-// 	addGameCmd.Flags().IntVarP(&addGameToSeason, "season", "s", 0, "Season to add game to. Zero adds to the most recent season, 1/-1 adds to last season, etc")
-// 	addGameCmd.Flags().IntVarP(&numInnings, "numInnings", "i", 5, "Number of innings this game will have.")
-// 	addGameCmd.Flags().StringVarP(&startTimeDesc, "startTime", "t", "", "Start time of the game")
-// 	addGameCmd.Flags().StringVarP(&opponentTeam, "oppTeam", "o", "", "Name of the opposing team")
-// 	addGameCmd.Flags().StringVarP(&gameDetails, "details", "d", "", "Any additional details for the game")
-
-// 	rootCmd.AddCommand(addCmd)
-
-// 	addCmd.AddCommand(addGameCmd)
-// 	addCmd.AddCommand(addSeasonCmd)
-// }
+func init() {
+	seasonCmd.AddCommand(seasonAddCmd)
+}

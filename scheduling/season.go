@@ -10,6 +10,7 @@ import (
 
 //Season is a struct for describing the Season for a Team.
 type Season struct {
+	Name string
 	Desc string
 
 	Games []*Game

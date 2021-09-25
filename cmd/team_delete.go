@@ -72,6 +72,8 @@ func deleteTeam(teamName string) error {
 
 	if viper.Get(selectedTeamConfigKey) == teamName {
 		viper.Set(selectedTeamConfigKey, "")
+
+		return viperUpdateOrCreate()
 	}
 
 	return nil

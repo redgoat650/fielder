@@ -35,7 +35,8 @@ var (
 )
 
 const (
-	teamsDirName = "teams"
+	teamsDirName          = "teams"
+	selectedTeamConfigKey = "selectedTeam"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -134,6 +135,7 @@ func getTeamNameFromViper() (string, error) {
 	if !viper.IsSet(selectedTeamConfigKey) {
 		return "", errors.New("no team selected")
 	}
+
 	teamName := viper.Get(selectedTeamConfigKey)
 
 	teamNameStr, ok := teamName.(string)

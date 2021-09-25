@@ -20,6 +20,11 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
+
+var (
+	clearTeam bool
 )
 
 // teamSwitchCmd represents the switch command
@@ -33,6 +38,17 @@ and usage of using your command. For example:`,
 
 func switchRunFunc(cmd *cobra.Command, args []string) error {
 	fmt.Println("switch called")
+
+	if clearTeam {
+		if len(args) != 0 {
+			return errors.New("expecting zero arguments")
+		}
+
+		fmt.Println("Clearing selected team")
+		viper.Set(selectedTeamConfigKey, "")
+
+		return viperUpdateOrCreate()
+	}
 
 	if len(args) != 1 {
 		return errors.New("expecting one argument, team name")
@@ -60,4 +76,6 @@ func switchRunFunc(cmd *cobra.Command, args []string) error {
 
 func init() {
 	teamCmd.AddCommand(teamSwitchCmd)
+	teamSwitchCmd.Aliases = append(teamSwitchCmd.Aliases, "select")
+	teamSwitchCmd.Flags().BoolVarP(&clearTeam, "none", "X", false, "Clear the currently selected team")
 }

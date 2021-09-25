@@ -21,10 +21,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	selectedTeamConfigKey = "selectedTeam"
-)
-
 // teamCmd represents the team command
 var teamCmd = &cobra.Command{
 	Use:   "team",
