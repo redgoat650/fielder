@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // seasonListCmd represents the list command
@@ -42,7 +43,7 @@ func seasonListRunCmd(cmd *cobra.Command, args []string) error {
 		return errors.New("no team selected")
 	}
 
-	fmt.Printf("Listing seasons for team %s:\n", gTeam.Name)
+	fmt.Printf("Listing seasons for team %q:\n", gTeam.Name)
 
 	if len(gTeam.SeasonList) == 0 {
 		fmt.Println("No seasons found! Add a season with 'fielder season add <name>'")
@@ -56,20 +57,16 @@ func seasonListRunCmd(cmd *cobra.Command, args []string) error {
 func renderListSeasons() {
 	for _, season := range gTeam.SeasonList {
 		delimStr := "-"
-		fmt.Printf("%s %s", delimStr, season.Name)
+		if season.Name == viper.Get(selectedSeasonConfigKey) {
+			delimStr = "*"
+		}
+
+		fmt.Printf("%s %s\n", delimStr, season.Name)
 	}
 }
 
 func init() {
 	seasonCmd.AddCommand(seasonListCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	seasonListCmd.Aliases = append(seasonListCmd.Aliases, "ls")
 }

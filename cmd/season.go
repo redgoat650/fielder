@@ -16,9 +16,11 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+)
+
+var (
+	selectedSeasonConfigKey = "selectedSeason"
 )
 
 // seasonCmd represents the season command
@@ -27,7 +29,7 @@ var seasonCmd = &cobra.Command{
 	Short: "Season controls",
 	Long:  `Controls for setting up and editing a season for a team.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("season called")
+		cmd.Usage()
 	},
 }
 

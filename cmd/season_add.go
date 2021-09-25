@@ -19,7 +19,9 @@ import (
 	"errors"
 	"fmt"
 
+	fielder "github.com/redgoat650/fielder/scheduling"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // seasonAddCmd represents the add command
@@ -45,9 +47,19 @@ func seasonAddRunFunc(cmd *cobra.Command, args []string) error {
 	name := args[0]
 	fmt.Printf("Adding season called %q\n", name)
 
-	// gTeam.SeasonList = append(gTeam.SeasonList, fielder.Season{Name: name})
+	if seasonNameExists(name) {
+		return errors.New("season already exists with this name")
+	}
 
-	return nil
+	gTeam.SeasonList[name] = fielder.Season{Name: name}
+
+	viper.Set(selectedSeasonConfigKey, name)
+	return viperUpdateOrCreate()
+}
+
+func seasonNameExists(name string) bool {
+	_, ok := gTeam.SeasonList[name]
+	return ok
 }
 
 func init() {
