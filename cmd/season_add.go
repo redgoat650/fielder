@@ -33,10 +33,19 @@ var seasonAddCmd = &cobra.Command{
 func seasonAddRunFunc(cmd *cobra.Command, args []string) error {
 	fmt.Println("season add called")
 
-	if gTeam != nil {
+	if gTeam == nil {
 		fmt.Println("Select a team with 'fielder team select <name>' or create a new one with 'fielder team create <name>'")
 		return errors.New("no team selected")
 	}
+
+	if len(args) != 1 {
+		return errors.New("expecting one season name argument")
+	}
+
+	name := args[0]
+	fmt.Printf("Adding season called %q\n", name)
+
+	// gTeam.SeasonList = append(gTeam.SeasonList, fielder.Season{Name: name})
 
 	return nil
 }

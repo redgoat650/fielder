@@ -29,8 +29,9 @@ import (
 )
 
 var (
+	gTeam *fielder.Team
+
 	cfgFile       string
-	gTeam         *fielder.Team
 	dataDirParent string
 )
 
@@ -87,7 +88,7 @@ func writeGlobalTeam() error {
 	teamsDir := filepath.Join(dataDirParent, teamsDirName)
 	_ = os.MkdirAll(teamsDir, 0755)
 
-	filename := getFullTeamFilePath(gTeam.TeamName)
+	filename := getFullTeamFilePath(gTeam.Name)
 
 	return os.WriteFile(filename, b, 0755)
 }
@@ -111,6 +112,11 @@ func loadTeam() error {
 		return err
 	}
 
+	if teamName == "" {
+		fmt.Println("Select a team with 'fielder team select <name>'")
+		return errors.New("no team selected")
+	}
+
 	return loadTeamByName(teamName)
 }
 
@@ -127,7 +133,7 @@ func loadTeamByName(teamName string) error {
 		return err
 	}
 
-	fmt.Println("Using existing team", gTeam.TeamName)
+	fmt.Println("Using existing team", gTeam.Name)
 	return nil
 }
 

@@ -3,35 +3,46 @@ package fielder
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"os"
+	"strings"
 )
 
 //Team is a structure containing the information on a Team.
 //The players on a Team are a superset of each Game's Roster.
 type Team struct {
-	TeamName string
-	// Players  *Roster
-	// Active   *Roster
-
-	SeasonList []*Season
+	Name       string
+	SeasonList []Season
 }
 
 //NewTeam will initialize a new Team and return its pointer
 func NewTeam(name string) *Team {
-	// team := new(Team)
-	// team.Players = NewRoster()
-	// team.Active = NewRoster()
-	// team.SeasonList = make([]*Season, 0)
-	// team.SetTeamName(name)
-	// return team
 	return &Team{
-		TeamName: name,
+		Name: name,
 	}
+}
+
+func (team *Team) String() string {
+	str := new(strings.Builder)
+	str.WriteString(fmt.Sprintf("Team %s\n", team.Name))
+
+	//Print seasons
+	if len(team.SeasonList) > 0 {
+		str.WriteString("---------------\n")
+		str.WriteString("Seasons:\n")
+		str.WriteString("---------------\n")
+
+		for _, season := range team.SeasonList {
+			str.WriteString(fmt.Sprintf("%s\n", season))
+		}
+	}
+
+	return str.String()
 }
 
 //SetTeamName will set the name of the team
 func (team *Team) SetTeamName(name string) {
-	team.TeamName = name
+	team.Name = name
 }
 
 //AddPlayer will append a new Player to the Team's player list
@@ -105,20 +116,3 @@ func LoadTeamFromFile(filename string) (team *Team, err error) {
 
 	return loadTeam, err
 }
-
-// func (team *Team) String() string {
-// str := new(strings.Builder)
-// str.WriteString(fmt.Sprintf("Team %s\n", team.TeamName))
-
-// //Print players
-// str.WriteString("---------------\nActive players:\n---------------\n")
-// str.WriteString(fmt.Sprintf("%s\n", team.Active))
-
-// //Print seasons
-// str.WriteString("---------------\nSeasons:\n---------------\n")
-// for _, season := range team.SeasonList {
-// 	str.WriteString(fmt.Sprintf("%s\n", season))
-// }
-
-// return str.String()
-// }

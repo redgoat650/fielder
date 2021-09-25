@@ -16,25 +16,25 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
-// teamCmd represents the team command
-var teamCmd = &cobra.Command{
-	Use:   "team",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+// teamDescribeCmd represents the describe command
+var teamDescribeCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "Describe team.",
+	Long:  `Describe the details of a team.`,
+	Run:   teamDescribeRunFunc,
+}
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+func teamDescribeRunFunc(cmd *cobra.Command, args []string) {
+	fmt.Println("describe called")
 
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Usage()
-	},
+	fmt.Println(gTeam)
 }
 
 func init() {
-	rootCmd.AddCommand(teamCmd)
+	teamCmd.AddCommand(teamDescribeCmd)
 }

@@ -74,18 +74,18 @@ func (season Season) String() string {
 	str := new(strings.Builder)
 
 	str.WriteString("Season:\n")
+	str.WriteString(season.Name)
 	str.WriteString(season.Desc)
 	str.WriteString("\n")
 
 	for gameNum, game := range season.Games {
-
 		str.WriteString(fmt.Sprintf("Game %d:\n", gameNum))
 
 		str.WriteString(game.String())
 
 		str.WriteString("---------------------------------\n")
-
 	}
+
 	return str.String()
 }
 

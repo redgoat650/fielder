@@ -42,7 +42,7 @@ func seasonListRunCmd(cmd *cobra.Command, args []string) error {
 		return errors.New("no team selected")
 	}
 
-	fmt.Printf("Listing seasons for team %s:\n", gTeam.TeamName)
+	fmt.Printf("Listing seasons for team %s:\n", gTeam.Name)
 
 	if len(gTeam.SeasonList) == 0 {
 		fmt.Println("No seasons found! Add a season with 'fielder season add <name>'")
