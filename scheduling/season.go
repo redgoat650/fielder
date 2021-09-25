@@ -12,7 +12,6 @@ import (
 type Season struct {
 	Desc string
 
-	Team  *Team
 	Games []*Game
 }
 
@@ -26,8 +25,6 @@ func NewSeason(numGames int, inningsPerGame int) *Season {
 	for gameNum := 0; gameNum < numGames; gameNum++ {
 		season.Games = append(season.Games, NewGame(inningsPerGame, gameNum))
 	}
-
-	season.Team = NewTeam("")
 
 	return season
 }
@@ -46,11 +43,6 @@ func (season *Season) AddGame(innings int, startTime, oppTeam, gameDetails strin
 //ScheduleAllGames schedules the all games in the season for the provided
 //Season.
 func (season *Season) ScheduleAllGames() error {
-
-	if season.Team == nil {
-		panic("No team for this season")
-	}
-
 	for gameNo, game := range season.Games {
 
 		gameRoster := game.Roster

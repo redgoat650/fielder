@@ -47,12 +47,12 @@ func renderTeamNamesFromDir() error {
 	fmt.Println("Available team names:")
 	for _, name := range names {
 
-		var selectedTeamMarker = ""
+		var selectedTeamMarker = "-"
 		if name == viper.Get(selectedTeamConfigKey) {
-			selectedTeamMarker = " *"
+			selectedTeamMarker = "*"
 		}
 
-		fmt.Printf("- %s%s\n", name, selectedTeamMarker)
+		fmt.Printf("%s %s\n", selectedTeamMarker, name)
 	}
 
 	return nil
