@@ -79,4 +79,6 @@ func readTeamNamesFromDir() ([]string, error) {
 
 func init() {
 	teamCmd.AddCommand(teamListCmd)
+
+	teamListCmd.Aliases = append(teamListCmd.Aliases, "ls")
 }
