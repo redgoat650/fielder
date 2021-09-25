@@ -54,6 +54,7 @@ func teamDeleteRunFunc(cmd *cobra.Command, args []string) error {
 
 	if !teamDeleteConfirm {
 		fmt.Println("Rerun with '--delete' flag to confirm.")
+		return nil
 	}
 
 	return deleteTeam(name)
@@ -62,7 +63,7 @@ func teamDeleteRunFunc(cmd *cobra.Command, args []string) error {
 func deleteTeam(teamName string) error {
 	filename := getFullTeamFilePath(teamName)
 
-	fmt.Println("filename", filename)
+	fmt.Println("Removing", filename)
 
 	err := os.Remove(filename)
 	if err != nil {
