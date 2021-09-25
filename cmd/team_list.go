@@ -33,8 +33,6 @@ var teamListCmd = &cobra.Command{
 }
 
 func teamListRunFunc(cmd *cobra.Command, args []string) error {
-	fmt.Println("list called")
-
 	return renderTeamNamesFromDir()
 }
 
