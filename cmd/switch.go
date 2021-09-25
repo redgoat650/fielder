@@ -33,9 +33,15 @@ and usage of using your command. For example:`,
 
 func switchRunFunc(cmd *cobra.Command, args []string) error {
 	fmt.Println("switch called")
-	name := cmd.Flag(teamNameFlagName).Value.String()
+
+	if len(args) != 1 {
+		return errors.New("expecting one argument, team name")
+	}
+	name := args[0]
+	fmt.Printf("Switching to team %q\n", name)
 
 	if !teamExists(name) {
+		renderTeamNamesFromDir()
 		return errors.New("team not found")
 	}
 
@@ -54,7 +60,4 @@ func switchRunFunc(cmd *cobra.Command, args []string) error {
 
 func init() {
 	teamCmd.AddCommand(switchCmd)
-
-	switchCmd.Flags().StringP(teamNameFlagName, "n", "", "Team name")
-	switchCmd.MarkFlagRequired(teamNameFlagName)
 }

@@ -27,10 +27,9 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:`,
-	RunE: teamListRunFunc,
+	Short: "List teams",
+	Long:  `List all available teams`,
+	RunE:  teamListRunFunc,
 }
 
 func teamListRunFunc(cmd *cobra.Command, args []string) error {
@@ -47,7 +46,13 @@ func renderTeamNamesFromDir() error {
 
 	fmt.Println("Available team names:")
 	for _, name := range names {
-		fmt.Println("-", name)
+
+		var selectedTeamMarker = ""
+		if name == viper.Get(selectedTeamConfigKey) {
+			selectedTeamMarker = " *"
+		}
+
+		fmt.Printf("- %s%s\n", name, selectedTeamMarker)
 	}
 
 	return nil
@@ -66,12 +71,7 @@ func readTeamNamesFromDir() ([]string, error) {
 		fileName := entry.Name()
 		teamName := strings.TrimSuffix(fileName, ".json")
 
-		var selectedTeamMarker = ""
-		if teamName == viper.Get(selectedTeamConfigKey) {
-			selectedTeamMarker = " *"
-		}
-
-		ret = append(ret, teamName+selectedTeamMarker)
+		ret = append(ret, teamName)
 	}
 
 	return ret, nil

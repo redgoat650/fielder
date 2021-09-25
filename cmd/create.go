@@ -26,10 +26,6 @@ import (
 	fielder "github.com/redgoat650/fielder/scheduling"
 )
 
-var (
-	teamNameFlagName = "name"
-)
-
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
@@ -42,7 +38,13 @@ and usage of using your command. For example:`,
 
 func teamCreateRunFunc(cmd *cobra.Command, args []string) error {
 	fmt.Println("create called")
-	name := cmd.Flag(teamNameFlagName).Value.String()
+
+	if len(args) != 1 {
+		return errors.New("expecting one argument, team name")
+	}
+
+	name := args[0]
+	fmt.Printf("Creating team %q\n", name)
 
 	if teamExists(name) {
 		return errors.New("team already exists")
@@ -83,15 +85,4 @@ func viperUpdateOrCreate() error {
 
 func init() {
 	teamCmd.AddCommand(createCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// createCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	createCmd.Flags().StringP(teamNameFlagName, "n", "", "Team name")
-	createCmd.MarkFlagRequired(teamNameFlagName)
 }

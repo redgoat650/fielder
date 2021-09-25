@@ -16,9 +16,16 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
+
+var (
+	teamDeleteConfirm bool
 )
 
 // deleteCmd represents the delete command
@@ -26,14 +33,48 @@ var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+and usage of using your command. For example:`,
+	RunE: teamDeleteRunFunc,
+}
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("delete called")
-	},
+func teamDeleteRunFunc(cmd *cobra.Command, args []string) error {
+	fmt.Println("delete called")
+
+	if len(args) != 1 {
+		return errors.New("expecting one argument, team name")
+	}
+
+	name := args[0]
+
+	if !teamExists(name) {
+		fmt.Printf("Could not find team: %q\n", name)
+		return errors.New("team not found")
+	}
+
+	fmt.Printf("Will permanently delete team: %q\n", name)
+
+	if !teamDeleteConfirm {
+		fmt.Println("Rerun with '--delete' flag to confirm.")
+	}
+
+	return deleteTeam(name)
+}
+
+func deleteTeam(teamName string) error {
+	filename := getFullTeamFilePath(teamName)
+
+	fmt.Println("filename", filename)
+
+	err := os.Remove(filename)
+	if err != nil {
+		return err
+	}
+
+	if viper.Get(selectedTeamConfigKey) == teamName {
+		viper.Set(selectedTeamConfigKey, "")
+	}
+
+	return nil
 }
 
 func init() {
@@ -47,5 +88,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// deleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	deleteCmd.Flags().BoolVarP(&teamDeleteConfirm, "delete", "D", false, "Confirm deletion")
 }

@@ -52,7 +52,7 @@ var rootCmd = &cobra.Command{
 
 func skipLoadTeam(cmd *cobra.Command) bool {
 	switch cmd.Name() {
-	case "create", "switch", "list":
+	case "create", "switch", "list", "delete":
 		return cmd.Parent().Name() == "team"
 	}
 	return false
