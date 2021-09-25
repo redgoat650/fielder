@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -70,11 +69,7 @@ func deleteTeam(teamName string) error {
 		return err
 	}
 
-	if viper.Get(selectedTeamConfigKey) == teamName {
-		viper.Set(selectedTeamConfigKey, "")
-
-		return viperUpdateOrCreate()
-	}
+	clearSelectedTeam()
 
 	return nil
 }
