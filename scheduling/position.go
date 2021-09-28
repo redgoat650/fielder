@@ -159,21 +159,21 @@ const (
 )
 
 var posGroup2Positions = map[PositionGroup][]Position{
-	Outfield:           []Position{RField, RCenter, LCenter, LField},
-	Infield:            []Position{First, RShort, Second, LShort, Third},
-	AnyBase:            []Position{First, Second, Third},
-	NoBase:             []Position{RShort, LShort, RField, RCenter, LCenter, LField},
-	AnyShort:           []Position{RShort, LShort},
-	NoShort:            []Position{First, Second, Third, RField, RCenter, LCenter, LField},
-	NotPitcher:         []Position{Catcher, First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
-	NotCatcher:         []Position{Pitcher, First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
-	NotPitcherCatcher:  []Position{First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
-	LiterallyAnything:  []Position{Pitcher, Catcher, First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
-	TierOnePositions:   []Position{RField, LCenter},
-	TierTwoPositions:   []Position{RShort, Second},
-	TierThreePositions: []Position{LShort, RCenter, LField},
-	TierFourPositions:  []Position{First, Third},
-	TierFivePositions:  []Position{Pitcher, Catcher},
+	Outfield:           {RField, RCenter, LCenter, LField},
+	Infield:            {First, RShort, Second, LShort, Third},
+	AnyBase:            {First, Second, Third},
+	NoBase:             {RShort, LShort, RField, RCenter, LCenter, LField},
+	AnyShort:           {RShort, LShort},
+	NoShort:            {First, Second, Third, RField, RCenter, LCenter, LField},
+	NotPitcher:         {Catcher, First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
+	NotCatcher:         {Pitcher, First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
+	NotPitcherCatcher:  {First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
+	LiterallyAnything:  {Pitcher, Catcher, First, Second, Third, LShort, RShort, LField, LCenter, RCenter, RField},
+	TierOnePositions:   {RField, LCenter},
+	TierTwoPositions:   {RShort, Second},
+	TierThreePositions: {LShort, RCenter, LField},
+	TierFourPositions:  {First, Third},
+	TierFivePositions:  {Pitcher, Catcher},
 }
 
 // String stringifies the position group
