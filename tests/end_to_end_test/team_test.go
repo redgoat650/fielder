@@ -141,4 +141,15 @@ func TestNewTeamSwitch(t *testing.T) {
 		t.Fatal("Team was expected to appear as selected when listing teams")
 	}
 
+	// Check clearing the currently selected team
+	out, _ = r.Run(t, false, "team", "switch", "--none")
+	if !strings.Contains(out, "- test-team-1") {
+		t.Fatal("List does not indicate test-team-1 was unselected")
+	}
+
+	// Reselect a team
+	out, _ = r.Run(t, false, "team", "select", "test-team-1")
+	if !strings.Contains(out, "* test-team-1") {
+		t.Fatal("List does not indicate test-team-1 was re-selected")
+	}
 }

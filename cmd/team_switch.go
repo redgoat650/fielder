@@ -46,6 +46,7 @@ func switchRunFunc(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("expecting one argument, team name")
 	}
+
 	name := args[0]
 	fmt.Printf("Switching to team %q\n", name)
 
