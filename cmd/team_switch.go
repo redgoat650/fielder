@@ -55,10 +55,18 @@ func switchRunFunc(cmd *cobra.Command, args []string) error {
 		return errors.New("team not found")
 	}
 
+	if name == viper.GetString(selectedTeamConfigKey) {
+		fmt.Printf("Team %q was already selected.\n", name)
+		return renderTeamNamesFromDir()
+	}
+
 	err := loadTeamByName(name)
 	if err != nil {
 		return err
 	}
+
+	// Unset the selected season
+	viper.Set(selectedSeasonConfigKey, "")
 
 	err = viperSetTeam(name)
 	if err != nil {
