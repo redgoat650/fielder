@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -53,7 +54,7 @@ func teamDeleteRunFunc(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Will permanently delete team: %q\n", name)
 
 	if !teamDeleteConfirm {
-		fmt.Println("Rerun with '--delete' flag to confirm.")
+		fmt.Println("Rerun with '--delete' flag to confirm deletion.")
 		return nil
 	}
 
@@ -70,21 +71,14 @@ func deleteTeam(teamName string) error {
 		return err
 	}
 
-	clearSelectedTeam()
+	if viper.GetString(selectedTeamConfigKey) == teamName {
+		return clearSelectedTeam()
+	}
 
 	return nil
 }
 
 func init() {
 	teamCmd.AddCommand(teamDeleteCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// deleteCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	teamDeleteCmd.Flags().BoolVarP(&teamDeleteConfirm, "delete", "D", false, "Confirm deletion")
 }
