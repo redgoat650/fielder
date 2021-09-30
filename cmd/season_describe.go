@@ -39,19 +39,13 @@ func seasonDescribeRunFunc(cmd *cobra.Command, args []string) error {
 		return errors.New("no season selected")
 	}
 
-	seasonName := viper.Get(selectedSeasonConfigKey)
+	seasonName := viper.GetString(selectedSeasonConfigKey)
 
-	seasonNameStr, ok := seasonName.(string)
-	if !ok {
-		fmt.Println("Config:", seasonName)
-		return errors.New("cannot parse season name")
-	}
-
-	if _, ok := gTeam.SeasonList[seasonNameStr]; !ok {
+	if _, ok := gTeam.SeasonList[seasonName]; !ok {
 		return errors.New("season not found")
 	}
 
-	fmt.Println(gTeam.SeasonList[seasonNameStr])
+	fmt.Println(gTeam.SeasonList[seasonName])
 
 	return nil
 }

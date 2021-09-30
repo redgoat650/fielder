@@ -191,14 +191,25 @@ func ParseGenderString(genderStr string) (PlayerGender, error) {
 func (player Player) String() string {
 	str := new(strings.Builder)
 
-	str.WriteString(fmt.Sprintf("%s %s, %s, %s, %s\n", player.FirstName, player.LastName, player.Gender, player.Email, player.Phone))
+	str.WriteString(fmt.Sprintf("%s %s, %s\n", player.FirstName, player.LastName, player.Gender))
+	if player.Email != "" {
+		str.WriteString(fmt.Sprintf("%s\n", player.Email))
+	}
+
+	if player.Phone != "" {
+		str.WriteString(fmt.Sprintf("%s\n", player.Phone))
+	}
+
 	for pref, val := range player.Pref {
 		str.WriteString(fmt.Sprintf("%s %d (%v)\n", pref, val, player.PrefNorm[pref]))
 	}
+
 	str.WriteString("\n")
+
 	for pref, val := range player.CptPref {
 		str.WriteString(fmt.Sprintf("%s %d (%v)\n", pref, val, player.CptPrefNorm[pref]))
 	}
+
 	str.WriteString("\n")
 
 	return str.String()

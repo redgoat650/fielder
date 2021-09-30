@@ -60,7 +60,7 @@ func (roster *Roster) CountGenders() (female, male int) {
 // String meets the stringer interface
 func (roster Roster) String() string {
 	str := new(strings.Builder)
-	for player := range roster.Players {
+	for _, player := range roster.Players {
 		str.WriteString(fmt.Sprintf("%s", player))
 	}
 	return str.String()

@@ -1,7 +1,6 @@
 package fielder
 
 import (
-	"bytes"
 	"encoding/gob"
 	"fmt"
 	"os"
@@ -77,6 +76,8 @@ func (season Season) String() string {
 	str.WriteString(season.Desc)
 	str.WriteString("\n")
 
+	str.WriteString(season.Roster.String())
+
 	for gameNum, game := range season.Games {
 		str.WriteString(fmt.Sprintf("Game %d:\n", gameNum))
 
@@ -88,42 +89,42 @@ func (season Season) String() string {
 	return str.String()
 }
 
-// SaveToFile saves a Season to the given file name
-func (season *Season) SaveToFile(filename string) error {
+// // SaveToFile saves a Season to the given file name
+// func (season *Season) SaveToFile(filename string) error {
 
-	// for i := range season.Games {
-	// 	season.Games[i].Self = nil
-	// }
+// 	// for i := range season.Games {
+// 	// 	season.Games[i].Self = nil
+// 	// }
 
-	buf := new(bytes.Buffer)
+// 	buf := new(bytes.Buffer)
 
-	encErr := gob.NewEncoder(buf).Encode(season)
-	if encErr != nil {
-		return encErr
-	}
+// 	encErr := gob.NewEncoder(buf).Encode(season)
+// 	if encErr != nil {
+// 		return encErr
+// 	}
 
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
+// 	file, err := os.Create(filename)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	i := 0
-	n := 0
-	for {
-		n, err = file.Write(buf.Bytes()[i:])
-		if err != nil {
-			return err
-		}
-		i += n
+// 	i := 0
+// 	n := 0
+// 	for {
+// 		n, err = file.Write(buf.Bytes()[i:])
+// 		if err != nil {
+// 			return err
+// 		}
+// 		i += n
 
-		if i >= len(buf.Bytes()) {
-			break
-		}
-	}
+// 		if i >= len(buf.Bytes()) {
+// 			break
+// 		}
+// 	}
 
-	return nil
+// 	return nil
 
-}
+// }
 
 // LoadSeasonFromFile loads a Season from data in a given file name
 func LoadSeasonFromFile(filename string) (season *Season, err error) {
