@@ -13,7 +13,8 @@ type Season struct {
 	Name string
 	Desc string
 
-	Games []*Game
+	Roster *Roster
+	Games  []*Game
 }
 
 //NewSeason initializes a Season with a new Team for a given
