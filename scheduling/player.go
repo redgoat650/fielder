@@ -142,27 +142,13 @@ func (player *Player) IsFemale() bool {
 // }
 
 //PlayerGender is a type that describes the gender of a player
-type PlayerGender int
-
-//String is a helper method on PlayerGender that satisfies the
-//Stringer interface to assist with printing the gender of the player
-func (gender PlayerGender) String() string {
-	switch gender {
-	case FemaleGender:
-		return fmt.Sprintf("Female")
-	case MaleGender:
-		return fmt.Sprintf("Male")
-	default:
-		return fmt.Sprintf("Undefined gender")
-	}
-}
+type PlayerGender string
 
 //List of PlayerGenders
 const (
-	InvalidGender PlayerGender = iota
-	FemaleGender
-	MaleGender
-	NumGenders int = iota
+	FemaleGender  PlayerGender = "female"
+	MaleGender    PlayerGender = "male"
+	InvalidGender PlayerGender = "invalid"
 )
 
 var femaleGenderStrs = []string{"f", "female", "girl", "woman"}
@@ -199,7 +185,7 @@ func ParseGenderString(genderStr string) (PlayerGender, error) {
 		return MaleGender, nil
 	}
 
-	return InvalidGender, fmt.Errorf("Unable to parse gender string %v", genderStr)
+	return InvalidGender, fmt.Errorf("unable to parse gender string %v", genderStr)
 }
 
 func (player Player) String() string {
