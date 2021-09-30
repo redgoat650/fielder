@@ -14,7 +14,7 @@ type Roster struct {
 //NewRoster initializes a Roster and returns its pointer
 func NewRoster() *Roster {
 	roster := new(Roster)
-	roster.Players = make(map[PlayerID]*Player, 0)
+	roster.Players = make(map[PlayerID]*Player)
 	return roster
 }
 
