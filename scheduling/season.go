@@ -33,13 +33,11 @@ func NewSeason(numGames int, inningsPerGame int) *Season {
 
 // AddGame adds a game to the Season
 func (season *Season) AddGame(innings int, startTime, oppTeam, gameDetails string) {
-
 	game := NewGame(innings, len(season.Games))
 	game.SetStartStr(startTime)
 	game.SetOppTeam(oppTeam)
 	game.SetGameDetails(gameDetails)
 	season.Games = append(season.Games, game)
-
 }
 
 //ScheduleAllGames schedules the all games in the season for the provided

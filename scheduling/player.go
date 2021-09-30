@@ -165,17 +165,40 @@ const (
 	NumGenders int = iota
 )
 
+var femaleGenderStrs = []string{"f", "female", "girl", "woman"}
+var maleGenderStrs = []string{"m", "male", "boy", "man"}
+
+func isFemaleGender(s string) bool {
+	return isGender(s, femaleGenderStrs)
+}
+
+func isMaleGender(s string) bool {
+	return isGender(s, maleGenderStrs)
+}
+
+func isGender(s string, l []string) bool {
+	for _, cmp := range l {
+		if s == cmp {
+			return true
+		}
+	}
+
+	return false
+}
+
 // ParseGenderString parses a string and returns a PlayerGender.
 // It is the complementary operation to PlayerGender.String()
 func ParseGenderString(genderStr string) (PlayerGender, error) {
-	for _, checkGender := range []PlayerGender{
-		FemaleGender,
-		MaleGender,
-	} {
-		if checkGender.String() == genderStr {
-			return checkGender, nil
-		}
+	lowerGenderStr := strings.ToLower(genderStr)
+
+	if isFemaleGender(lowerGenderStr) {
+		return FemaleGender, nil
 	}
+
+	if isMaleGender(lowerGenderStr) {
+		return MaleGender, nil
+	}
+
 	return InvalidGender, fmt.Errorf("Unable to parse gender string %v", genderStr)
 }
 
