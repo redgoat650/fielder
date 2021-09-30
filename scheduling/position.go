@@ -79,7 +79,8 @@ func ParsePositionStr(posStr string) (Position, error) {
 			return checkPos, nil
 		}
 	}
-	return Bench, fmt.Errorf("Can't parse position string %v", posStr)
+
+	return Bench, fmt.Errorf("can't parse position string %v", posStr)
 }
 
 //posIdx2Position converts a position index to a Position value,
@@ -132,7 +133,8 @@ func ParsePositionGroupString(posStr string) ([]Position, error) {
 			return ps, nil
 		}
 	}
-	return nil, fmt.Errorf("Could not parse position group string %q", posStr)
+
+	return nil, fmt.Errorf("could not parse position group string %q", posStr)
 }
 
 // PositionGroup enumerates a named group of positions
