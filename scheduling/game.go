@@ -604,7 +604,6 @@ func (game *ScratchGame) ScoreGame(prefLookup [][]float64, cptPrefLookup [][]flo
 //ScheduleGame2 is a Game method that schedules positions for all players
 //in the Game roster.
 func (game *Game) ScheduleGame2() error {
-
 	err := checkRoster(game.Roster)
 	if err != nil {
 		return err
