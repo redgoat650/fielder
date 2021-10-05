@@ -8,24 +8,24 @@ import (
 //Roster is a list of Players that will be participating
 //in a game
 type Roster struct {
-	Players map[PlayerID]*Player
+	Players map[string]*Player
 }
 
 //NewRoster initializes a Roster and returns its pointer
 func NewRoster() *Roster {
 	roster := new(Roster)
-	roster.Players = make(map[PlayerID]*Player)
+	roster.Players = make(map[string]*Player)
 	return roster
 }
 
 //AddPlayer is a roster method that will add a Player to the Roster
 func (roster *Roster) AddPlayer(player *Player) {
-	roster.Players[player.ID] = player
+	roster.Players[player.Name] = player
 }
 
 //DropPlayer is a roster method that will drop a Player from the Roster
 func (roster *Roster) DropPlayer(player *Player) {
-	delete(roster.Players, player.ID)
+	delete(roster.Players, player.Name)
 }
 
 // Reset rests a roster

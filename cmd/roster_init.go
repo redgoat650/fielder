@@ -60,17 +60,17 @@ func rosterInitRunFunc(cmd *cobra.Command, args []string) error {
 	for _, playerStr := range players {
 		p := strings.Split(playerStr, " ")
 
-		if len(p) != 3 {
+		if len(p) != 2 {
 			return errors.New("player was not formatted correctly")
 		}
 
-		first, last := p[0], p[1]
+		name := p[0]
 		gender, err := fielder.ParseGenderString(p[2])
 		if err != nil {
 			return err
 		}
 
-		gTeam.SeasonList[selectedSeason].Roster.AddPlayer(fielder.NewPlayer(first, last, gender))
+		gTeam.SeasonList[selectedSeason].Roster.AddPlayer(fielder.NewPlayer(name, gender))
 	}
 
 	return nil

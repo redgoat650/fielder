@@ -2,7 +2,6 @@ package fielder
 
 import (
 	"fmt"
-	"math/rand"
 	"strings"
 )
 
@@ -11,10 +10,8 @@ type PlayerID uint64
 //Player is a struct for storing the information and scheduling
 //information for each player
 type Player struct {
-	ID        PlayerID
-	FirstName string
-	LastName  string
-	Gender    PlayerGender
+	Name   string
+	Gender PlayerGender
 
 	Pref map[Position]int
 	// PrefNorm    map[Position]float64
@@ -25,26 +22,38 @@ type Player struct {
 }
 
 //NewPlayer initializes a new Player and returns its pointer
-func NewPlayer(first, last string, gender PlayerGender) *Player {
-	p := new(Player)
-	p.ID = PlayerID(rand.Uint64())
-	p.FirstName = first
-	p.LastName = last
-	p.Gender = gender
+func NewPlayer(name string, gender PlayerGender) *Player {
+	return &Player{
+		Name:   name,
+		Gender: gender,
+		Pref:   prefInit(),
+	}
+	// p := new(Player)
+	// p.Name = name
+	// p.Gender = gender
 
-	p.Pref = make(map[Position]int)
-	// p.CptPref = make(map[Position]int)
+	// p.Pref = make(map[Position]int)
+	// // p.CptPref = make(map[Position]int)
 
-	//Initialize the preferences table
+	// //Initialize the preferences table
+	// for _, pos := range fieldPosList {
+	// 	p.Pref[pos] = 0.0
+	// 	// p.CptPref[pos] = 0.0
+	// }
+
+	// // p.PrefNorm = make(map[Position]float64)
+	// // p.CptPrefNorm = make(map[Position]float64)
+
+	// return p
+}
+
+func prefInit() map[Position]int {
+	pref := make(map[Position]int)
 	for _, pos := range fieldPosList {
-		p.Pref[pos] = 0.0
-		// p.CptPref[pos] = 0.0
+		pref[pos] = 0
 	}
 
-	// p.PrefNorm = make(map[Position]float64)
-	// p.CptPrefNorm = make(map[Position]float64)
-
-	return p
+	return pref
 }
 
 func (player *Player) normalizePrefs() map[Position]float64 {
@@ -85,41 +94,41 @@ func (player *Player) normalizePrefs() map[Position]float64 {
 	return prefNorm
 }
 
-func (player *Player) normalizeCptPrefs() {
-	max := 0.0
-	min := 0.0
-	minSet := false
-	for _, prefStrength := range player.CptPref {
+// func (player *Player) normalizeCptPrefs() {
+// 	max := 0.0
+// 	min := 0.0
+// 	minSet := false
+// 	for _, prefStrength := range player.CptPref {
 
-		strFloat := float64(prefStrength)
-		if strFloat > max {
-			max = strFloat
-		}
-		if !minSet || strFloat < min {
-			minSet = true
-			min = strFloat
-		}
-	}
+// 		strFloat := float64(prefStrength)
+// 		if strFloat > max {
+// 			max = strFloat
+// 		}
+// 		if !minSet || strFloat < min {
+// 			minSet = true
+// 			min = strFloat
+// 		}
+// 	}
 
-	for pos, val := range player.CptPref {
+// 	for pos, val := range player.CptPref {
 
-		if max == min {
-			player.CptPrefNorm[pos] = 1.0
-			continue
-		}
+// 		if max == min {
+// 			player.CptPrefNorm[pos] = 1.0
+// 			continue
+// 		}
 
-		player.CptPrefNorm[pos] = (float64(val) - min) / (float64(max) - min)
+// 		player.CptPrefNorm[pos] = (float64(val) - min) / (float64(max) - min)
 
-		//Checks on output
-		if player.CptPrefNorm[pos] > 1.0 {
-			panic("Normalization error: Preference overflows expected max")
-		}
-		if player.CptPrefNorm[pos] < 0.0 {
-			panic("Normalization error: Preference underflows expected min")
-		}
-	}
+// 		//Checks on output
+// 		if player.CptPrefNorm[pos] > 1.0 {
+// 			panic("Normalization error: Preference overflows expected max")
+// 		}
+// 		if player.CptPrefNorm[pos] < 0.0 {
+// 			panic("Normalization error: Preference underflows expected min")
+// 		}
+// 	}
 
-}
+// }
 
 //IsFemale is a helper method for Player that returns whether
 //the player is female
@@ -183,19 +192,21 @@ func ParseGenderString(genderStr string) (PlayerGender, error) {
 func (player Player) String() string {
 	str := new(strings.Builder)
 
-	str.WriteString(fmt.Sprintf("%s %s, %s\n", player.FirstName, player.LastName, player.Gender))
+	str.WriteString(fmt.Sprintf("%s, %s\n", player.Name, player.Gender))
+
+	prefNorm := player.normalizePrefs()
 
 	for pref, val := range player.Pref {
-		str.WriteString(fmt.Sprintf("%s %d (%v)\n", pref, val, player.PrefNorm[pref]))
+		str.WriteString(fmt.Sprintf("%s %d (%v)\n", pref, val, prefNorm[pref]))
 	}
 
 	str.WriteString("\n")
 
-	for pref, val := range player.CptPref {
-		str.WriteString(fmt.Sprintf("%s %d (%v)\n", pref, val, player.CptPrefNorm[pref]))
-	}
+	// for pref, val := range player.CptPref {
+	// 	str.WriteString(fmt.Sprintf("%s %d (%v)\n", pref, val, player.CptPrefNorm[pref]))
+	// }
 
-	str.WriteString("\n")
+	// str.WriteString("\n")
 
 	return str.String()
 

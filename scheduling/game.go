@@ -76,15 +76,15 @@ func (game *Game) String() string {
 
 	//Analysis of players in each position by inning
 	for inningNum, inning := range game.Innings {
-
 		s.WriteString(fmt.Sprintf("Inning %d:\n", inningNum+1))
 
-		for pos, playerID := range inning.FieldPositions {
-			if playerID == 0 {
-				panic("shouldn't have a nil position???")
+		for pos, player := range inning.FieldPositions {
+			if player == nil {
+				s.WriteString(fmt.Sprintf("%s: NONE", pos))
+				continue
 			}
-			player := game.Roster.Players[playerID]
-			s.WriteString(fmt.Sprintf("%s: %s (%s)\n", pos, player.FirstName, player.Gender))
+
+			s.WriteString(fmt.Sprintf("%s: %s (%s)\n", pos, player.Name, player.Gender))
 		}
 
 		s.WriteString("----------------\n")
@@ -100,14 +100,14 @@ func (game *Game) String() string {
 	leastInningsFemale := len(game.Innings)
 	mostBenchInARow := 0
 
-	for playerID, player := range game.Roster.Players {
+	for _, player := range game.Roster.Players {
 
 		inningsThisPlayer := 0
 
 		for inningNum, inning := range game.Innings {
-			role := inning.FindPlayerPosition(playerID)
+			role := inning.FindPlayerPosition(player)
 
-			s.WriteString(fmt.Sprintf("Inning %d: %s plays ", inningNum+1, player.FirstName))
+			s.WriteString(fmt.Sprintf("Inning %d: %s plays ", inningNum+1, player.Name))
 			if role == Bench {
 				s.WriteString(fmt.Sprintf("(%s)\n", role))
 			} else {
@@ -118,12 +118,12 @@ func (game *Game) String() string {
 				inningsThisPlayer++
 			}
 		}
-		benchInARowThisPlayer := game.calcBenchInARowByPlayerID(playerID)
+		benchInARowThisPlayer := game.calcBenchInARowByPlayer(player)
 		if benchInARowThisPlayer > mostBenchInARow {
 			mostBenchInARow = benchInARowThisPlayer
 		}
 
-		s.WriteString(fmt.Sprintf("%s is playing %d innings\n", player.FirstName, inningsThisPlayer))
+		s.WriteString(fmt.Sprintf("%s is playing %d innings\n", player.Name, inningsThisPlayer))
 		s.WriteString(fmt.Sprintf("and is on the BENCH %v times in a row\n", benchInARowThisPlayer))
 		s.WriteString(fmt.Sprintf("----------\n"))
 
@@ -155,9 +155,8 @@ func (game *Game) String() string {
 		s.WriteString(fmt.Sprintf("%v: ", pos))
 		pls := make([]string, 0)
 		for _, inning := range game.Innings {
-			pID := inning.FieldPositions[pos]
-			player := game.Roster.Players[pID]
-			pls = append(pls, player.FirstName)
+			player := inning.FieldPositions[pos]
+			pls = append(pls, player.Name)
 		}
 		s.WriteString(fmt.Sprintf("%v\n", strings.Join(pls, ", ")))
 	}
@@ -633,22 +632,22 @@ func (game *Game) ScheduleGame2() error {
 		prefLookup[i] = make([]float64, NumFieldPositions)
 		cptPrefLookup[i] = make([]float64, NumFieldPositions)
 
-		player.normalizePrefs()
-		for pos, normMag := range player.PrefNorm {
+		prefNorm := player.normalizePrefs()
+		for pos, normMag := range prefNorm {
 
 			posIdx := position2PosIdx(pos)
 			prefLookup[i][posIdx] = normMag
 
 		}
 
-		player.normalizeCptPrefs()
-		for pos, cptPrefMag := range player.CptPrefNorm {
-			posIdx := position2PosIdx(pos)
-			cptPrefLookup[i][posIdx] = cptPrefMag
-		}
+		// player.normalizeCptPrefs()
+		// for pos, cptPrefMag := range player.CptPrefNorm {
+		// 	posIdx := position2PosIdx(pos)
+		// 	cptPrefLookup[i][posIdx] = cptPrefMag
+		// }
 
-		skillLookup[i] = player.Skill
-		seniorityLookup[i] = player.Seniority
+		// skillLookup[i] = player.Skill
+		// seniorityLookup[i] = player.Seniority
 
 		isFemale := player.IsFemale()
 		genderFemaleLookup[i] = isFemale
@@ -831,8 +830,8 @@ outerLoop:
 
 func (game *Game) calcBenchInARow() int {
 	mostBenchInARow := 0
-	for playerID := range game.Roster.Players {
-		mostBenchInARowThisPlayer := game.calcBenchInARowByPlayerID(playerID)
+	for _, player := range game.Roster.Players {
+		mostBenchInARowThisPlayer := game.calcBenchInARowByPlayer(player)
 		if mostBenchInARowThisPlayer > mostBenchInARow {
 			mostBenchInARow = mostBenchInARowThisPlayer
 		}
@@ -840,11 +839,11 @@ func (game *Game) calcBenchInARow() int {
 	return mostBenchInARow
 }
 
-func (game *Game) calcBenchInARowByPlayerID(playerID PlayerID) int {
+func (game *Game) calcBenchInARowByPlayer(player *Player) int {
 	mostBenchInARowThisPlayer := 0
 	runningBenchInARowThisPlayer := 0
 	for _, inning := range game.Innings {
-		role := inning.FindPlayerPosition(playerID)
+		role := inning.FindPlayerPosition(player)
 		if role != Bench {
 			runningBenchInARowThisPlayer = 0
 		} else {
@@ -858,11 +857,6 @@ func (game *Game) calcBenchInARowByPlayerID(playerID PlayerID) int {
 }
 
 func (game *Game) fillFromScratch(scrGame *ScratchGame, playerLookup []*Player) {
-
-	// for playerInfo := range game.Roster.Players {
-	// 	playerInfo.Roles[game] = make([]Position, game.NumInnings())
-	// }
-
 	for inningNum := 0; inningNum < scrGame.numInnings; inningNum++ {
 
 		for posIdx := 0; posIdx < NumFieldPositions; posIdx++ {
@@ -875,10 +869,7 @@ func (game *Game) fillFromScratch(scrGame *ScratchGame, playerLookup []*Player) 
 			player := playerLookup[playerIdx]
 			pos := posIdx2Position(posIdx)
 
-			game.Innings[inningNum].FieldPositions[pos] = player.ID
-
-			// player.Roles[game][inningNum] = pos
-
+			game.Innings[inningNum].FieldPositions[pos] = player
 		}
 	}
 }
