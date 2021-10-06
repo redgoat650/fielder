@@ -10,7 +10,11 @@ import (
 	fielder "github.com/redgoat650/fielder/scheduling"
 )
 
-func parsePlayerList(filename string) ([]*fielder.Player, error) {
+func ParsePlayerListFromFile(filename string) ([]*fielder.Player, error) {
+	return parsePlayerListFromFile(filename)
+}
+
+func parsePlayerListFromFile(filename string) ([]*fielder.Player, error) {
 	playerData, err := csvhelper.ParseCSVFile(filename)
 	if err != nil {
 		return nil, err
