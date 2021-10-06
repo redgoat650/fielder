@@ -1,6 +1,7 @@
 package fielder
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"math/rand"
@@ -529,6 +530,366 @@ func (game *ScratchGame) verifyGame(femaleLookup []bool) error {
 	return nil
 }
 
+type BetterGame struct {
+	Innings []*BetterInning
+}
+
+type BetterInning struct {
+	PositionsMap map[Position]*Player
+}
+
+type ScoringParams struct {
+	Player         *Player
+	PlayerPrefNorm map[Position]float64
+	CptPrefNorm    map[Position]float64
+	Skill          float64
+	Seniority      float64
+}
+
+func NewBetterGame(numInnings int) *BetterGame {
+	game := new(BetterGame)
+
+	for i := 0; i < numInnings; i++ {
+		game.Innings = append(game.Innings, &BetterInning{
+			PositionsMap: make(map[Position]*Player),
+		})
+	}
+
+	return game
+}
+
+func (game *BetterGame) String() string {
+	s := new(strings.Builder)
+	for inningNum, inning := range game.Innings {
+		s.WriteString(fmt.Sprintf("Inning %d:\n", inningNum+1))
+
+		for pos, player := range inning.PositionsMap {
+			if player == nil {
+				s.WriteString(fmt.Sprintf("%s: NONE", pos))
+				continue
+			}
+
+			s.WriteString(fmt.Sprintf("%s: %s (%s)\n", pos, player.Name, player.Gender))
+		}
+
+		s.WriteString("----------------\n")
+
+	}
+
+	mostInnings := 0
+	leastInnings := len(game.Innings)
+	mostInningsMale := 0
+	mostInningsFemale := 0
+	leastInningsMale := len(game.Innings)
+	leastInningsFemale := len(game.Innings)
+	mostBenchInARow := 0
+
+	for _, player := range game.Roster.Players {
+
+		inningsThisPlayer := 0
+
+		for inningNum, inning := range game.Innings {
+			role := inning.FindPlayerPosition(player)
+
+			s.WriteString(fmt.Sprintf("Inning %d: %s plays ", inningNum+1, player.Name))
+			if role == Bench {
+				s.WriteString(fmt.Sprintf("(%s)\n", role))
+			} else {
+				s.WriteString(fmt.Sprintf("%s\n", role))
+			}
+
+			if role != Bench {
+				inningsThisPlayer++
+			}
+		}
+		benchInARowThisPlayer := game.calcBenchInARowByPlayer(player)
+		if benchInARowThisPlayer > mostBenchInARow {
+			mostBenchInARow = benchInARowThisPlayer
+		}
+
+		s.WriteString(fmt.Sprintf("%s is playing %d innings\n", player.Name, inningsThisPlayer))
+		s.WriteString(fmt.Sprintf("and is on the BENCH %v times in a row\n", benchInARowThisPlayer))
+		s.WriteString(fmt.Sprintf("----------\n"))
+
+		//Counter metrics
+		if inningsThisPlayer > mostInnings {
+			mostInnings = inningsThisPlayer
+		}
+		if inningsThisPlayer < leastInnings {
+			leastInnings = inningsThisPlayer
+		}
+		if player.IsFemale() {
+			if inningsThisPlayer > mostInningsFemale {
+				mostInningsFemale = inningsThisPlayer
+			}
+			if inningsThisPlayer < leastInningsFemale {
+				leastInningsFemale = inningsThisPlayer
+			}
+		} else {
+			if inningsThisPlayer > mostInningsMale {
+				mostInningsMale = inningsThisPlayer
+			}
+			if inningsThisPlayer < leastInningsMale {
+				leastInningsMale = inningsThisPlayer
+			}
+		}
+	}
+
+	for _, pos := range fieldPosList {
+		s.WriteString(fmt.Sprintf("%v: ", pos))
+		pls := make([]string, 0)
+		for _, inning := range game.Innings {
+			player := inning.FieldPositions[pos]
+			pls = append(pls, player.Name)
+		}
+		s.WriteString(fmt.Sprintf("%v\n", strings.Join(pls, ", ")))
+	}
+	s.WriteString("----------------\n")
+
+	s.WriteString(fmt.Sprintf("Most innings played by a player: %d\nLeast innings played by a player: %d\n", mostInnings, leastInnings))
+	s.WriteString(fmt.Sprintf("Most innings played by a FEMALE: %d\nLeast innings played by a FEMALE: %d\n", mostInningsFemale, leastInningsFemale))
+	s.WriteString(fmt.Sprintf("Most innings played by a MALE: %d\nLeast innings played by a MALE: %d\n", mostInningsMale, leastInningsMale))
+	s.WriteString(fmt.Sprintf("Most innings in a row on a bench: %d\n", mostBenchInARow))
+
+	s.WriteString("\n")
+
+	return s.String()
+}
+
+func (game *BetterGame) ScoreGame(scoringParams map[*Player]ScoringParams) float64 {
+	inningsPlayedLookup := make(map[*Player]int)
+
+	score := 0.0
+
+	for _, inning := range game.Innings {
+		for pos, player := range inning.PositionsMap {
+			p := scoringParams[player]
+
+			prefScore := p.PlayerPrefNorm[pos]
+			cptPrefScore := p.CptPrefNorm[pos]
+
+			skillFactor := p.Skill
+			seniorityFactor := p.Seniority
+
+			innPlayed := inningsPlayedLookup[player]
+
+			playBonusScale := 6.0
+			prefScoreScale := 6.0
+			cptPrefScoreScale := 6.0
+			skillFactorScale := 1.0
+			seniorityFactorScale := 1.0
+			participationPenaltyFactor := 0.8
+			playingBonus := 1.0
+			sum := playBonusScale + prefScoreScale + cptPrefScoreScale + skillFactorScale + seniorityFactorScale
+
+			//Player is happier if
+			//1. they play in an inning
+			//2. they play a position they really want
+			//3. they have played fewer innings already
+			playerScoreThisInn := (playingBonus*playBonusScale/sum +
+				prefScore*prefScoreScale/sum +
+				cptPrefScore*cptPrefScoreScale/sum +
+				skillFactor*skillFactorScale/sum +
+				seniorityFactor*seniorityFactorScale/sum)
+
+			playerScoreScaledByPlayTime := playerScoreThisInn * math.Pow(participationPenaltyFactor, float64(innPlayed))
+
+			score += playerScoreScaledByPlayTime
+
+			inningsPlayedLookup[player]++
+		}
+	}
+
+	return score
+}
+
+type BetterRoster []ScoringParams
+
+func makeScoringLookup(roster BetterRoster) map[*Player]ScoringParams {
+	ret := make(map[*Player]ScoringParams)
+
+	for _, scoringParams := range roster {
+		ret[scoringParams.Player] = scoringParams
+	}
+
+	return ret
+}
+
+var posList = []Position{
+	Pitcher,
+	Catcher,
+	First,
+	Second,
+	Third,
+	LShort,
+	RShort,
+	LField,
+	LCenter,
+	RCenter,
+	RField,
+}
+
+func randomPosition() Position {
+	return posList[rand.Intn(len(posList))]
+}
+
+func (game *BetterGame) populateRandomly(roster BetterRoster) {
+	for _, inning := range game.Innings {
+		for _, pos := range posList {
+			inning.PositionsMap[pos] = nil
+		}
+
+		var availPlayers = make(map[*Player]struct{})
+		var availMale = make(map[*Player]struct{})
+		var availFemale = make(map[*Player]struct{})
+
+		for _, playerScoringParams := range roster {
+			player := playerScoringParams.Player
+			availPlayers[player] = struct{}{}
+
+			if player.IsFemale() {
+				availFemale[player] = struct{}{}
+			} else {
+				availMale[player] = struct{}{}
+			}
+		}
+
+		malesNeeded := MinGenderCount
+		femalesNeeded := MinGenderCount
+
+		for pos := range inning.PositionsMap {
+			var selectedPlayer *Player
+
+			switch {
+			case malesNeeded > 0:
+				selectedPlayer = randInMap(availMale)
+				delete(availMale, selectedPlayer)
+				malesNeeded--
+
+			case femalesNeeded > 0:
+				selectedPlayer = randInMap(availFemale)
+				delete(availFemale, selectedPlayer)
+				femalesNeeded--
+
+			default:
+				selectedPlayer = randInMap(availPlayers)
+			}
+
+			delete(availPlayers, selectedPlayer)
+
+			inning.PositionsMap[pos] = selectedPlayer
+		}
+	}
+}
+
+func randInMap(m map[*Player]struct{}) *Player {
+	n := rand.Intn(len(m))
+
+	for p := range m {
+		if n <= 0 {
+			return p
+		}
+		n--
+	}
+
+	return nil
+}
+
+func (game *BetterGame) ScheduleGame(roster BetterRoster) error {
+	scoringLookup := makeScoringLookup(roster)
+
+	game.populateRandomly(roster)
+
+	oldScore := game.ScoreGame(scoringLookup)
+
+	callConvergeAt := 1000000
+
+	convCount := 0
+
+	for {
+		randInning := game.Innings[rand.Intn(len(game.Innings))]
+		randPosition := randomPosition()
+		swapPlayer := randInning.PositionsMap[randPosition]
+
+		if swapPlayer == nil {
+			continue
+		}
+
+		randRosterPlayer := roster[rand.Intn(len(roster))].Player
+
+		prevPos := Bench
+		for pos, playerAtPos := range randInning.PositionsMap {
+			if playerAtPos == randRosterPlayer {
+				randInning.PositionsMap[pos] = swapPlayer
+				// fmt.Println("swapping", swapPlayer.Name, "to", pos, ", which is", randRosterPlayer.Name, "'s original position")
+				prevPos = pos
+
+				break
+			}
+		}
+
+		randInning.PositionsMap[randPosition] = randRosterPlayer
+		// fmt.Println("trying", randRosterPlayer.Name, "at", randPosition)
+
+		newScore := game.ScoreGame(scoringLookup)
+
+		convCount++
+
+		if newScore < oldScore || game.verifyGame() != nil {
+			// Swap back
+			// fmt.Println("Swapping back")
+			if prevPos != Bench {
+				randInning.PositionsMap[prevPos] = randRosterPlayer
+				// fmt.Println("Swapping back", randRosterPlayer.Name, "to", prevPos)
+			}
+
+			randInning.PositionsMap[randPosition] = swapPlayer
+			// fmt.Println("Swapping back", swapPlayer.Name, "to", randPosition)
+
+		} else if newScore > oldScore {
+			fmt.Printf("Score %f -> %f\n", oldScore, newScore)
+
+			oldScore = newScore
+
+			//Got a higher score so reset the convergence counter
+			convCount = 0
+		}
+
+		if convCount >= callConvergeAt {
+			break
+		}
+	}
+
+	fmt.Println("Done!")
+
+	// game.minimizeBenchTime()
+
+	return nil
+}
+
+func (game *BetterGame) verifyGame() error {
+	for _, inning := range game.Innings {
+		maleCount := 0
+		femaleCount := 0
+
+		for _, player := range inning.PositionsMap {
+			if player != nil {
+				if player.IsFemale() {
+					femaleCount++
+				} else {
+					maleCount++
+				}
+			}
+		}
+
+		if maleCount < MinGenderCount || femaleCount < MinGenderCount {
+			return errors.New("not valid positions")
+		}
+	}
+
+	return nil
+}
+
 // ScoreGame scores a scratch game
 func (game *ScratchGame) ScoreGame(prefLookup [][]float64, cptPrefLookup [][]float64, playerTakenTable [][]int, skillLookup []float64, seniorityLookup []float64) float64 {
 
@@ -705,9 +1066,7 @@ func (game *Game) ScheduleGame2() error {
 			if genderErr != nil {
 				return genderErr
 			}
-
 		}
-
 	}
 
 	oldScore := scratchGame.ScoreGame(

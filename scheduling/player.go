@@ -60,12 +60,18 @@ func (player *Player) normalizePrefs() map[Position]float64 {
 	max := 0.0
 	min := 0.0
 	minSet := false
-	for _, prefStrength := range player.Pref {
+
+	for _, pos := range fieldPosList {
+		prefStrength, ok := player.Pref[pos]
+		if !ok {
+			prefStrength = 0
+		}
 
 		strFloat := float64(prefStrength)
 		if strFloat > max {
 			max = strFloat
 		}
+
 		if !minSet || strFloat < min {
 			minSet = true
 			min = strFloat
@@ -73,7 +79,12 @@ func (player *Player) normalizePrefs() map[Position]float64 {
 	}
 
 	prefNorm := make(map[Position]float64)
-	for pos, val := range player.Pref {
+	for _, pos := range fieldPosList {
+		val, ok := player.Pref[pos]
+
+		if !ok {
+			val = 0
+		}
 
 		if max == min {
 			prefNorm[pos] = 1.0
@@ -86,6 +97,7 @@ func (player *Player) normalizePrefs() map[Position]float64 {
 		if prefNorm[pos] > 1.0 {
 			panic("Normalization error: Preference overflows expected max")
 		}
+
 		if prefNorm[pos] < 0.0 {
 			panic("Normalization error: Preference underflows expected min")
 		}
