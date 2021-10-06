@@ -576,82 +576,82 @@ func (game *BetterGame) String() string {
 
 	}
 
-	mostInnings := 0
-	leastInnings := len(game.Innings)
-	mostInningsMale := 0
-	mostInningsFemale := 0
-	leastInningsMale := len(game.Innings)
-	leastInningsFemale := len(game.Innings)
-	mostBenchInARow := 0
+	// mostInnings := 0
+	// leastInnings := len(game.Innings)
+	// mostInningsMale := 0
+	// mostInningsFemale := 0
+	// leastInningsMale := len(game.Innings)
+	// leastInningsFemale := len(game.Innings)
+	// mostBenchInARow := 0
 
-	for _, player := range game.Roster.Players {
+	// for _, player := range game.Roster.Players {
 
-		inningsThisPlayer := 0
+	// 	inningsThisPlayer := 0
 
-		for inningNum, inning := range game.Innings {
-			role := inning.FindPlayerPosition(player)
+	// 	for inningNum, inning := range game.Innings {
+	// 		role := inning.FindPlayerPosition(player)
 
-			s.WriteString(fmt.Sprintf("Inning %d: %s plays ", inningNum+1, player.Name))
-			if role == Bench {
-				s.WriteString(fmt.Sprintf("(%s)\n", role))
-			} else {
-				s.WriteString(fmt.Sprintf("%s\n", role))
-			}
+	// 		s.WriteString(fmt.Sprintf("Inning %d: %s plays ", inningNum+1, player.Name))
+	// 		if role == Bench {
+	// 			s.WriteString(fmt.Sprintf("(%s)\n", role))
+	// 		} else {
+	// 			s.WriteString(fmt.Sprintf("%s\n", role))
+	// 		}
 
-			if role != Bench {
-				inningsThisPlayer++
-			}
-		}
-		benchInARowThisPlayer := game.calcBenchInARowByPlayer(player)
-		if benchInARowThisPlayer > mostBenchInARow {
-			mostBenchInARow = benchInARowThisPlayer
-		}
+	// 		if role != Bench {
+	// 			inningsThisPlayer++
+	// 		}
+	// 	}
+	// 	benchInARowThisPlayer := game.calcBenchInARowByPlayer(player)
+	// 	if benchInARowThisPlayer > mostBenchInARow {
+	// 		mostBenchInARow = benchInARowThisPlayer
+	// 	}
 
-		s.WriteString(fmt.Sprintf("%s is playing %d innings\n", player.Name, inningsThisPlayer))
-		s.WriteString(fmt.Sprintf("and is on the BENCH %v times in a row\n", benchInARowThisPlayer))
-		s.WriteString(fmt.Sprintf("----------\n"))
+	// 	s.WriteString(fmt.Sprintf("%s is playing %d innings\n", player.Name, inningsThisPlayer))
+	// 	s.WriteString(fmt.Sprintf("and is on the BENCH %v times in a row\n", benchInARowThisPlayer))
+	// 	s.WriteString(fmt.Sprintf("----------\n"))
 
-		//Counter metrics
-		if inningsThisPlayer > mostInnings {
-			mostInnings = inningsThisPlayer
-		}
-		if inningsThisPlayer < leastInnings {
-			leastInnings = inningsThisPlayer
-		}
-		if player.IsFemale() {
-			if inningsThisPlayer > mostInningsFemale {
-				mostInningsFemale = inningsThisPlayer
-			}
-			if inningsThisPlayer < leastInningsFemale {
-				leastInningsFemale = inningsThisPlayer
-			}
-		} else {
-			if inningsThisPlayer > mostInningsMale {
-				mostInningsMale = inningsThisPlayer
-			}
-			if inningsThisPlayer < leastInningsMale {
-				leastInningsMale = inningsThisPlayer
-			}
-		}
-	}
+	// 	//Counter metrics
+	// 	if inningsThisPlayer > mostInnings {
+	// 		mostInnings = inningsThisPlayer
+	// 	}
+	// 	if inningsThisPlayer < leastInnings {
+	// 		leastInnings = inningsThisPlayer
+	// 	}
+	// 	if player.IsFemale() {
+	// 		if inningsThisPlayer > mostInningsFemale {
+	// 			mostInningsFemale = inningsThisPlayer
+	// 		}
+	// 		if inningsThisPlayer < leastInningsFemale {
+	// 			leastInningsFemale = inningsThisPlayer
+	// 		}
+	// 	} else {
+	// 		if inningsThisPlayer > mostInningsMale {
+	// 			mostInningsMale = inningsThisPlayer
+	// 		}
+	// 		if inningsThisPlayer < leastInningsMale {
+	// 			leastInningsMale = inningsThisPlayer
+	// 		}
+	// 	}
+	// }
 
-	for _, pos := range fieldPosList {
-		s.WriteString(fmt.Sprintf("%v: ", pos))
-		pls := make([]string, 0)
-		for _, inning := range game.Innings {
-			player := inning.FieldPositions[pos]
-			pls = append(pls, player.Name)
-		}
-		s.WriteString(fmt.Sprintf("%v\n", strings.Join(pls, ", ")))
-	}
-	s.WriteString("----------------\n")
+	// for _, pos := range fieldPosList {
+	// 	s.WriteString(fmt.Sprintf("%v: ", pos))
+	// 	pls := make([]string, 0)
+	// 	for _, inning := range game.Innings {
+	// 		player := inning.FieldPositions[pos]
+	// 		pls = append(pls, player.Name)
+	// 	}
+	// 	s.WriteString(fmt.Sprintf("%v\n", strings.Join(pls, ", ")))
+	// }
+	// s.WriteString("----------------\n")
 
-	s.WriteString(fmt.Sprintf("Most innings played by a player: %d\nLeast innings played by a player: %d\n", mostInnings, leastInnings))
-	s.WriteString(fmt.Sprintf("Most innings played by a FEMALE: %d\nLeast innings played by a FEMALE: %d\n", mostInningsFemale, leastInningsFemale))
-	s.WriteString(fmt.Sprintf("Most innings played by a MALE: %d\nLeast innings played by a MALE: %d\n", mostInningsMale, leastInningsMale))
-	s.WriteString(fmt.Sprintf("Most innings in a row on a bench: %d\n", mostBenchInARow))
+	// s.WriteString(fmt.Sprintf("Most innings played by a player: %d\nLeast innings played by a player: %d\n", mostInnings, leastInnings))
+	// s.WriteString(fmt.Sprintf("Most innings played by a FEMALE: %d\nLeast innings played by a FEMALE: %d\n", mostInningsFemale, leastInningsFemale))
+	// s.WriteString(fmt.Sprintf("Most innings played by a MALE: %d\nLeast innings played by a MALE: %d\n", mostInningsMale, leastInningsMale))
+	// s.WriteString(fmt.Sprintf("Most innings in a row on a bench: %d\n", mostBenchInARow))
 
-	s.WriteString("\n")
+	// s.WriteString("\n")
 
 	return s.String()
 }
@@ -715,7 +715,7 @@ func makeScoringLookup(roster BetterRoster) map[*Player]ScoringParams {
 	return ret
 }
 
-var posList = []Position{
+var PositionList = []Position{
 	Pitcher,
 	Catcher,
 	First,
@@ -730,12 +730,12 @@ var posList = []Position{
 }
 
 func randomPosition() Position {
-	return posList[rand.Intn(len(posList))]
+	return PositionList[rand.Intn(len(PositionList))]
 }
 
 func (game *BetterGame) populateRandomly(roster BetterRoster) {
 	for _, inning := range game.Innings {
-		for _, pos := range posList {
+		for _, pos := range PositionList {
 			inning.PositionsMap[pos] = nil
 		}
 

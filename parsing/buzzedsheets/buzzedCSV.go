@@ -1,11 +1,11 @@
 package buzzedsheets
 
 import (
-	"encoding/csv"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/redgoat650/fielder/parsing/csvhelper"
 	fielder "github.com/redgoat650/fielder/scheduling"
 )
 
@@ -16,7 +16,7 @@ const (
 // ParseBuzzedSheets takes in a legacy buzzed style sheet in CSV format
 // and outputs a Game ready for scheduling on the specified day.
 func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, captCfgCSV, gameDate string) (*fielder.Game, error) {
-	schedule, err := parseCSVFile(scheduleCSVPath)
+	schedule, err := csvhelper.ParseCSVFile(scheduleCSVPath)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, captCfgCSV, gameDate 
 
 	var pref [][]string
 	if preferenceCSVPath != "" {
-		pref, err = parseCSVFile(preferenceCSVPath)
+		pref, err = csvhelper.ParseCSVFile(preferenceCSVPath)
 		if err != nil {
 			return nil, err
 		}
@@ -40,7 +40,7 @@ func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, captCfgCSV, gameDate 
 		if err != nil {
 			return nil, err
 		}
-		cptPrefParsed, err = parseCSVFile(captCfgCSV)
+		cptPrefParsed, err = csvhelper.ParseCSVFile(captCfgCSV)
 		if err != nil {
 			return nil, err
 		}
@@ -94,20 +94,6 @@ func ParseBuzzedSheets(scheduleCSVPath, preferenceCSVPath, captCfgCSV, gameDate 
 	game := fielder.NewGame(numInnings, 0)
 	game.SetRoster(gameRoster)
 	return game, nil
-}
-
-func parseCSVFile(filepath string) ([][]string, error) {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-
-	r := csv.NewReader(f)
-	parsed, err := r.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-	return parsed, nil
 }
 
 const (

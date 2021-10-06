@@ -169,22 +169,6 @@ func parseSeason(srv *sheets.Service, ssid string) (*fielder.Season, error) {
 			player := fielder.NewPlayer(first, last, gender)
 
 			fmt.Println(row, len(row))
-			if len(row) > 2 {
-				player.Phone = row[2].(string)
-			}
-
-			if len(row) > 3 {
-				player.Email = row[3].(string)
-			}
-
-			for gameNo, game := range season.Games {
-				if gameNo >= len(gameCols) || gameCols[gameNo] != WillNotAttendString {
-					fmt.Printf("%s playing game %d\n", player.FirstName, gameNo)
-					// season.Games[gameNo].Roster.AddPlayer(player)
-					player.Attendance[game] = true
-				}
-			}
-
 			season.Team.AddPlayer(player)
 		}
 	}
