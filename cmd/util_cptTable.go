@@ -19,16 +19,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// utilPlayerTableCmd represents the playerTable command
-var utilPlayerTableCmd = &cobra.Command{
-	Use:   "playerTable",
-	Short: "Util commands for player tables",
-	Long:  `Util commands for generating and parsing player tables`,
+// utilCptTableCmd represents the cptTable command
+var utilCptTableCmd = &cobra.Command{
+	Use:   "cptTable",
+	Short: "Util commands for captain tables",
+	Long:  `Util commands for generating and parsing captain tables`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 	},
 }
 
 func init() {
-	utilCmd.AddCommand(utilPlayerTableCmd)
+	utilCmd.AddCommand(utilCptTableCmd)
 }

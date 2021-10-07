@@ -30,7 +30,7 @@ func parsePlayerData(playerDataTable [][]string) ([]*fielder.Player, error) {
 
 	headerRow := playerDataTable[0]
 
-	colMap, err := readHeaderRow(headerRow)
+	colMap, err := readPlayerTableHeaderRow(headerRow)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ const (
 	genderHeaderString = "Gender"
 )
 
-func readHeaderRow(headerRow []string) (map[string]int, error) {
+func readPlayerTableHeaderRow(headerRow []string) (map[string]int, error) {
 	expHeaderRowWidth := len(fielder.PositionList) + 2 // Name + Gender
 	if len(headerRow) != expHeaderRowWidth {
 		fmt.Println("header row len", len(headerRow), "exp", expHeaderRowWidth)
@@ -166,7 +166,7 @@ func WriteSamplePlayerTable(w io.Writer, numPlayers int) error {
 }
 
 func createSamplePlayerPlayerData(numPlayers int) [][]string {
-	header := makeHeader()
+	header := makePlayerTableHeader()
 
 	return append(
 		[][]string{header},
@@ -174,7 +174,7 @@ func createSamplePlayerPlayerData(numPlayers int) [][]string {
 	)
 }
 
-func makeHeader() []string {
+func makePlayerTableHeader() []string {
 	header := []string{
 		nameHeaderString,
 		genderHeaderString,

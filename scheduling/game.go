@@ -540,11 +540,14 @@ type BetterInning struct {
 }
 
 type ScoringParams struct {
-	Player         *Player
-	PlayerPrefNorm map[Position]float64
-	CptPrefNorm    map[Position]float64
-	Skill          float64
-	Seniority      float64
+	Player *Player
+
+	CptPref   map[Position]int
+	Skill     float64
+	Seniority float64
+
+	cptPrefNorm    map[Position]float64
+	playerPrefNorm map[Position]float64
 }
 
 func NewBetterGame(numInnings int) *BetterGame {
@@ -667,8 +670,8 @@ func (game *BetterGame) ScoreGame(scoringParams map[*Player]ScoringParams) float
 		for pos, player := range inning.PositionsMap {
 			p := scoringParams[player]
 
-			prefScore := p.PlayerPrefNorm[pos]
-			cptPrefScore := p.CptPrefNorm[pos]
+			prefScore := p.playerPrefNorm[pos]
+			cptPrefScore := p.cptPrefNorm[pos]
 
 			skillFactor := p.Skill
 			seniorityFactor := p.Seniority
